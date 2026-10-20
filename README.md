@@ -29,18 +29,20 @@ The dataset is the adult human testis atlas of
 
 ## Running the material
 
-**On Orchestra**, during the session: one RStudio Server per participant, from
-the image below.
+**On [Orchestra](https://orchestraplatform.org)**, during the session: one
+RStudio Server per participant, from the image below (see
+[Orchestra](#orchestra)).
 
 **With Docker**: everything is pre-installed, and the data are already
 downloaded.
 
 ```sh
-docker run -e PASSWORD=gene2 -p 8787:8787 ghcr.io/js2264/gene2scrnaseqintro:devel
+docker run -v "$PWD":/data -e PASSWORD=gene2 -p 8787:8787 ghcr.io/js2264/gene2scrnaseqintro:devel
 ```
 
 then open <http://localhost:8787> and log in as `rstudio` / `gene2`. A copy of
-the workshop page is in `~/workshop/`.
+the workshop page is in `~/workshop/`, and the current folder of your computer
+appears as `~/data`.
 
 **Locally**, with R >= 4.6.0, a recent Bioconductor and about 8 GB of RAM:
 
@@ -54,7 +56,7 @@ BiocManager::install("js2264/GenE2-scRNAseq-intro", dependencies = TRUE)
 
 | Push to | GitHub Actions does |
 |---|---|
-| `devel` | `biocbook`: builds the Docker image against Bioconductor devel, renders the book inside it, pushes `ghcr.io/js2264/gene2scrnaseqintro:devel` (also tagged `latest` and with the package version) and deploys the book to `gh-pages`, under `docs/devel/`. `rcmdcheck`: `R CMD check` of the package. |
+| `devel` | `biocbook`: builds the Docker image against Bioconductor devel, renders the book inside it, pushes `ghcr.io/js2264/gene2scrnaseqintro:devel` (also tagged `latest`, with the package version, and with the commit's short SHA) and deploys the book to `gh-pages`, under `docs/devel/`. `rcmdcheck`: `R CMD check` of the package. |
 | a pull request to `devel` | `rcmdcheck` only. |
 | any other branch, by hand (*Actions* > *biocbook* > *Run workflow*) | `biocbook` builds the image and renders the book, without pushing or deploying anything. Use it to check a branch before merging. |
 
@@ -80,17 +82,56 @@ BiocBook::preview(bb)
 
 ### Orchestra
 
-Point the workshop at the image `ghcr.io/js2264/gene2scrnaseqintro:devel` (or
-at the tag of a given package version, to freeze the environment for the day),
-with RStudio on port `8787`. Set `DISABLE_AUTH=true` as an environment variable
-to skip the RStudio login. Reading the dense count table needs about 4 GB of
-RAM at its peak, so pick a size with at least 8 GB.
+The image meets Orchestra's
+[no-auth contract](https://orchestraplatform.org/docs/user-guide/configuring-images/)
+as it is: RStudio listens on port `8787`, and Orchestra sets `DISABLE_AUTH=true`
+itself, so no environment variable or container argument is needed. For
+participants, the image also:
 
-The image is ready for participants:
+- caches the count matrix and the `celldex` reference of the exercises, so
+  that nothing is downloaded during the session;
+- holds a copy of the workshop page and its figures in `~/workshop/`;
+- makes `/data`, Orchestra's per-participant workspace, writable by the
+  RStudio user at start-up, and links it as `~/data`. With a persistent
+  workspace, what participants save there comes back in their next session;
+  everything else is reset.
 
-- the count matrix and the `celldex` reference of the exercises are already
-  cached, so nothing is downloaded during the session;
-- `~/workshop/` holds a copy of the workshop page and its figures.
+**Add the workshop to the catalog** with a
+[*Workshop template* issue](https://github.com/orchestraplatform/orchestraplatform/issues/new?template=workshop-template.yml)
+on the Orchestra repository:
+
+| Field | Value |
+|---|---|
+| Display name | `Introduction to scRNA-seq analysis (GenE2 Master 2)` |
+| Slug | `gene2-scrnaseq-intro` |
+| Description | `2h30 live-coding introduction to single-cell RNA-seq analysis with Bioconductor, for the GenE2 Master 2 "Single-Cell Omics and Spatial Transcriptomics" teaching unit.` |
+| Image | `ghcr.io/js2264/gene2scrnaseqintro:<short SHA>`: the 7-character SHA of the `devel` commit whose image you want |
+| App port | `8787` |
+| Size | Large (2 CPU, 8Gi memory) |
+| Tags | bioconductor, rstudio |
+| Environment variables, Container args | leave empty |
+| Storage size | `10Gi` |
+| Persistent workspace | Per-user (keep /data between sessions) |
+| Landing URL | <https://js2264.github.io/GenE2-scRNAseq-intro/devel/> |
+| Source repo URL | <https://github.com/js2264/GenE2-scRNAseq-intro> |
+
+A bot validates the issue and comments; once a maintainer adds the `approve`
+label, it opens a pull request with the template, and merging that pull
+request deploys the workshop to the catalog.
+
+- **Size.** A session peaks at about 4 GB of RAM, when it reads the dense
+  count table: Standard (4Gi) is too tight, Large (8Gi) leaves room for the
+  exercises.
+- **Image tag.** Orchestra's nodes cache the images they pull, so a tag that
+  is pushed again (`devel`, `latest`, or the package version until it is
+  bumped) can give different participants different builds. The short-SHA tag
+  of a commit never changes. To update the workshop, push to `devel`, then
+  submit the issue form again with the same slug and the new short SHA. Sessions
+  already running keep their image: update before the event, not during it.
+- **On the day.** The default session length (4h) fits a 2h30 workshop. Tell
+  the platform admin your headcount and start time ahead of the event, so that
+  enough capacity is warmed up: the first launch on a cold node pulls the whole
+  image, which takes a few minutes.
 
 ### Data shipped with the package
 
