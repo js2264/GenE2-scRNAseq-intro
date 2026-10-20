@@ -38,3 +38,23 @@ RUN if grep -rqsE '^```\{python' /opt/pkg/inst; then \
 ## Build/install using same approach than BBS
 RUN R CMD INSTALL /opt/pkg
 RUN R CMD build --keep-empty-dirs --no-resave-data /opt/pkg
+
+## ---- Workshop: make the image ready for RStudio Server (e.g. on Orchestra) ----
+
+## Pre-download the data, so that nobody waits for a download on the day: the
+## count matrix (already cached by the book build above) and the celldex
+## reference used in the exercises. Both live in R's user cache, under
+## R_USER_CACHE_DIR, which the image's init scripts pass on to RStudio
+## sessions: make it writable by the RStudio user, and also reachable from
+## ~/.cache/R, for R sessions started without R_USER_CACHE_DIR
+RUN Rscript -e 'BiocFileCache::bfcrpath(BiocFileCache::BiocFileCache(ask = FALSE), "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE112nnn/GSE112013/suppl/GSE112013_Combined_UMI_table.txt.gz") ; invisible(celldex::HumanPrimaryCellAtlasData())' && \
+    chmod -R a+rwX "${R_USER_CACHE_DIR}" && \
+    mkdir -p /home/rstudio/.cache && \
+    ln -sfn "${R_USER_CACHE_DIR}/R" /home/rstudio/.cache/R && \
+    chown -h rstudio:rstudio /home/rstudio/.cache /home/rstudio/.cache/R
+
+## A copy of the workshop page and its figures in the RStudio user's home
+RUN mkdir -p /home/rstudio/workshop && \
+    cp /opt/pkg/inst/pages/workshop.qmd /home/rstudio/workshop/ && \
+    cp -r /opt/pkg/inst/pages/figures /home/rstudio/workshop/ && \
+    chown -R rstudio:rstudio /home/rstudio/workshop
