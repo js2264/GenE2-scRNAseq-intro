@@ -60,7 +60,7 @@ umi_url <- "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE112nnn/GSE112013/suppl/GS
 umi_path <- bfcrpath(bfc, umi_url)
 umi_path
 ##                                                                           BFC1 
-##  "/opt/R-cache/R/BiocFileCache/fa4fe3d29a_GSE112013_Combined_UMI_table.txt.gz"
+##  "/opt/R-cache/R/BiocFileCache/fa2f01cbe7_GSE112013_Combined_UMI_table.txt.gz"
 ```
 
 ### 2.2.2 Reading it into R
@@ -986,7 +986,7 @@ spermatogonia <- c(
 pb_sg <- pb[, pb$factor.celltype %in% spermatogonia]
 samples <- data.frame(
     celltype = factor(pb_sg$factor.celltype, levels = spermatogonia),
-    donor = pb_sg$factor.Donor,
+    donor = factor(pb_sg$factor.Donor),
     ncells = pb_sg$counts
 )
 samples
@@ -1012,8 +1012,6 @@ dds <- DESeqDataSetFromMatrix(
     colData = samples,
     design = ~ donor + celltype
 )
-##  Warning in DESeqDataSet(se, design = design, ignoreRank): some variables in
-##  design formula are characters, converting to factors
 dds <- dds[rowSums(counts(dds) >= 10) >= 3, ]
 dds <- DESeq(dds)
 res <- results(
@@ -1181,7 +1179,7 @@ About twenty lines of code. Everything else was looking at the results and decid
 > pb_soma <- pb[, pb$factor.celltype %in% somatic]
 > samples_soma <- data.frame(
 >     celltype = factor(pb_soma$factor.celltype, levels = somatic),
->     donor = pb_soma$factor.Donor
+>     donor = factor(pb_soma$factor.Donor)
 > )
 > dds_soma <- DESeqDataSetFromMatrix(
 >     countData = assay(pb_soma, "sums"),

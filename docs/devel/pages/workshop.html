@@ -97,7 +97,7 @@ div.csl-indent {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-5f883865545033bfab6feb3d329ab180.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-389a472ee631af36ae83c0184533fd26.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-e256e1c2045af1c6a2369b0244e0ffcc.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script src="../site_libs/quarto-contrib/kbd/kbd.js"></script>
 <link href="../site_libs/quarto-contrib/kbd/kbd.css" rel="stylesheet"><script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
@@ -479,7 +479,7 @@ Figure&nbsp;2.1: The standard Bioconductor single-cell workflow, in two parts se
 <span><span class="va">umi_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocFileCache/man/BiocFileCache-class.html">bfcrpath</a></span><span class="op">(</span><span class="va">bfc</span>, <span class="va">umi_url</span><span class="op">)</span></span>
 <span><span class="va">umi_path</span></span>
 <span><span class="co">##                                                                           BFC1 </span></span>
-<span><span class="co">##  "/opt/R-cache/R/BiocFileCache/fa4fe3d29a_GSE112013_Combined_UMI_table.txt.gz"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="co">##  "/opt/R-cache/R/BiocFileCache/fa2f01cbe7_GSE112013_Combined_UMI_table.txt.gz"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="reading-it-into-r" class="level3" data-number="2.2.2"><h3 data-number="2.2.2" class="anchored" data-anchor-id="reading-it-into-r">
 <span class="header-section-number">2.2.2</span> Reading it into R</h3>
@@ -1537,7 +1537,7 @@ Figure&nbsp;2.2: Anatomy of a <code>SingleCellExperiment</code>.
 <span><span class="va">pb_sg</span> <span class="op">&lt;-</span> <span class="va">pb</span><span class="op">[</span>, <span class="va">pb</span><span class="op">$</span><span class="va">factor.celltype</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="va">spermatogonia</span><span class="op">]</span></span>
 <span><span class="va">samples</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
 <span>    celltype <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">pb_sg</span><span class="op">$</span><span class="va">factor.celltype</span>, levels <span class="op">=</span> <span class="va">spermatogonia</span><span class="op">)</span>,</span>
-<span>    donor <span class="op">=</span> <span class="va">pb_sg</span><span class="op">$</span><span class="va">factor.Donor</span>,</span>
+<span>    donor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">pb_sg</span><span class="op">$</span><span class="va">factor.Donor</span><span class="op">)</span>,</span>
 <span>    ncells <span class="op">=</span> <span class="va">pb_sg</span><span class="op">$</span><span class="va">counts</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">samples</span></span>
@@ -1572,8 +1572,6 @@ Figure&nbsp;2.2: Anatomy of a <code>SingleCellExperiment</code>.
 <span>    colData <span class="op">=</span> <span class="va">samples</span>,</span>
 <span>    design <span class="op">=</span> <span class="op">~</span> <span class="va">donor</span> <span class="op">+</span> <span class="va">celltype</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">##  Warning in DESeqDataSet(se, design = design, ignoreRank): some variables in</span></span>
-<span><span class="co">##  design formula are characters, converting to factors</span></span>
 <span><span class="va">dds</span> <span class="op">&lt;-</span> <span class="va">dds</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html">rowSums</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/dge.html">counts</a></span><span class="op">(</span><span class="va">dds</span><span class="op">)</span> <span class="op">&gt;=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">&gt;=</span> <span class="fl">3</span>, <span class="op">]</span></span>
 <span><span class="va">dds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DESeq2/man/DESeq.html">DESeq</a></span><span class="op">(</span><span class="va">dds</span><span class="op">)</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DESeq2/man/results.html">results</a></span><span class="op">(</span></span>
@@ -1791,7 +1789,7 @@ Figure&nbsp;2.2: Anatomy of a <code>SingleCellExperiment</code>.
 <span><span class="va">pb_soma</span> <span class="op">&lt;-</span> <span class="va">pb</span><span class="op">[</span>, <span class="va">pb</span><span class="op">$</span><span class="va">factor.celltype</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="va">somatic</span><span class="op">]</span></span>
 <span><span class="va">samples_soma</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
 <span>    celltype <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">pb_soma</span><span class="op">$</span><span class="va">factor.celltype</span>, levels <span class="op">=</span> <span class="va">somatic</span><span class="op">)</span>,</span>
-<span>    donor <span class="op">=</span> <span class="va">pb_soma</span><span class="op">$</span><span class="va">factor.Donor</span></span>
+<span>    donor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">pb_soma</span><span class="op">$</span><span class="va">factor.Donor</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">dds_soma</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DESeq2/man/DESeqDataSet.html">DESeqDataSetFromMatrix</a></span><span class="op">(</span></span>
 <span>    countData <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">pb_soma</span>, <span class="st">"sums"</span><span class="op">)</span>,</span>

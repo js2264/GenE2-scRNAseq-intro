@@ -98,7 +98,7 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-5f883865545033bfab6feb3d329ab180.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-389a472ee631af36ae83c0184533fd26.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+<link href="site_libs/bootstrap/bootstrap-e256e1c2045af1c6a2369b0244e0ffcc.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
   "collapse-after": 3,
@@ -285,21 +285,23 @@ div.csl-indent {
 <section id="during-the-session-orchestra" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="during-the-session-orchestra">During the session: Orchestra</h2>
 <p>Each participant gets their own RStudio Server, running from the workshop image on the <a href="https://orchestraplatform.org">Orchestra platform</a>: nothing to install.</p>
 <ol type="1">
-<li>Follow the link shared by the instructor, and launch the workshop: an RStudio session opens in your browser (starting it can take a minute).</li>
-<li>Create a new R script (<em>File</em> &gt; <em>New File</em> &gt; <em>R Script</em>) and save it: this is where you will type the code of the session.</li>
-<li>A copy of the workshop page, <code>workshop/workshop.qmd</code>, is in your home directory, in case you lose track of the shared screen.</li>
+<li>Open the Orchestra dashboard (the instructor shares the link) and sign in with a Google account: a personal Gmail address or an institutional Google account both work.</li>
+<li>Find the workshop in the catalog and choose <em>Launch</em>. Its status goes from <em>Pending</em> to <em>Starting</em> to <em>Ready</em>: the first launch can take a few minutes, as the image is large.</li>
+<li>Choose <em>Open</em>: RStudio opens in a new tab, already logged in.</li>
+<li>Create a new R script (<em>File</em> &gt; <em>New File</em> &gt; <em>R Script</em>) and save it in the <code>data</code> folder of your home directory: this is where you will type the code of the session.</li>
 </ol>
+<p>A copy of the workshop page, <code>workshop/workshop.qmd</code>, is also in your home directory, in case you lose track of the shared screen.</p>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Warning</span>Your instance is temporary
+<span class="screen-reader-only">Warning</span>Your session is temporary
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Workshop instances do not last forever: download your script and anything else you want to keep (<em>Files</em> pane &gt; <em>More</em> &gt; <em>Export</em>) before the end of the day.</p>
+<p>Each session has a countdown, shown on its card in the dashboard: use <em>+1h</em> to extend it. When it ends, everything in it is deleted, except the <code>data</code> folder, which comes back in your next session of the workshop. Download anything else you want to keep (<em>Files</em> pane &gt; <em>More</em> &gt; <em>Export</em>) before the end.</p>
 </div>
 </div>
 </section><section id="after-the-session-docker" class="level2 unnumbered"><h2 class="unnumbered anchored" data-anchor-id="after-the-session-docker">After the session: Docker</h2>
@@ -310,13 +312,13 @@ div.csl-indent {
 <pre><strong>bash</strong></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="dt">\</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">--volume</span> <span class="op">&lt;</span>local_folder<span class="op">&gt;</span>:<span class="op">&lt;</span>destination_folder<span class="op">&gt;</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">--volume</span> <span class="op">&lt;</span>local_folder<span class="op">&gt;</span>:/data <span class="dt">\</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">-e</span> PASSWORD=gene2 <span class="dt">\</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">-p</span> 8787:8787 <span class="dt">\</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    ghcr.io/js2264/gene2scrnaseqintro:devel</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
-<p>then open <a href="http://localhost:8787">http://localhost:8787</a> and log in as <code>rstudio</code>, with the password set above (<code>gene2</code>). For an R console only:</p>
+<p>then open <a href="http://localhost:8787">http://localhost:8787</a> and log in as <code>rstudio</code>, with the password set above (<code>gene2</code>). <code>&lt;local_folder&gt;</code>, a folder of your computer, appears as <code>data</code> in RStudio’s home directory: save your work there. For an R console only:</p>
 <div class="cell" data-layout-align="center">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
@@ -613,7 +615,7 @@ div.csl-indent {
 <span><span class="co">##   yaml                   2.3.12    2025-12-10 [2] RSPM (R 4.6.0)</span></span>
 <span><span class="co">##   zip                    3.0.2     2026-08-04 [2] RSPM (R 4.6.0)</span></span>
 <span><span class="co">##  </span></span>
-<span><span class="co">##   [1] /tmp/Rtmpgs0rS5/Rinstb4783be7e</span></span>
+<span><span class="co">##   [1] /tmp/Rtmp91yz7A/Rinstb238996e1</span></span>
 <span><span class="co">##   [2] /usr/local/lib/R/site-library</span></span>
 <span><span class="co">##   [3] /usr/local/lib/R/library</span></span>
 <span><span class="co">##   * ── Packages attached to the search path.</span></span>

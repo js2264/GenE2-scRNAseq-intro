@@ -49,13 +49,16 @@ Everything the workshop needs comes in a single `Docker` image, built from this 
 
 Each participant gets their own RStudio Server, running from the workshop image on the [Orchestra platform](https://orchestraplatform.org): nothing to install.
 
-1.  Follow the link shared by the instructor, and launch the workshop: an RStudio session opens in your browser (starting it can take a minute).
-2.  Create a new R script (*File* \> *New File* \> *R Script*) and save it: this is where you will type the code of the session.
-3.  A copy of the workshop page, `workshop/workshop.qmd`, is in your home directory, in case you lose track of the shared screen.
+1.  Open the Orchestra dashboard (the instructor shares the link) and sign in with a Google account: a personal Gmail address or an institutional Google account both work.
+2.  Find the workshop in the catalog and choose *Launch*. Its status goes from *Pending* to *Starting* to *Ready*: the first launch can take a few minutes, as the image is large.
+3.  Choose *Open*: RStudio opens in a new tab, already logged in.
+4.  Create a new R script (*File* \> *New File* \> *R Script*) and save it in the `data` folder of your home directory: this is where you will type the code of the session.
+
+A copy of the workshop page, `workshop/workshop.qmd`, is also in your home directory, in case you lose track of the shared screen.
 
 > **WARNING:**
 >
-> Workshop instances do not last forever: download your script and anything else you want to keep (*Files* pane \> *More* \> *Export*) before the end of the day.
+> Each session has a countdown, shown on its card in the dashboard: use *+1h* to extend it. When it ends, everything in it is deleted, except the `data` folder, which comes back in your next session of the workshop. Download anything else you want to keep (*Files* pane \> *More* \> *Export*) before the end.
 
 ## After the session: Docker
 
@@ -63,13 +66,13 @@ The same environment runs on any computer with Docker installed. Start an RStudi
 
 ``` sh
 docker run \
-    --volume <local_folder>:<destination_folder> \
+    --volume <local_folder>:/data \
     -e PASSWORD=gene2 \
     -p 8787:8787 \
     ghcr.io/js2264/gene2scrnaseqintro:devel
 ```
 
-then open <http://localhost:8787> and log in as `rstudio`, with the password set above (`gene2`). For an R console only:
+then open <http://localhost:8787> and log in as `rstudio`, with the password set above (`gene2`). `<local_folder>`, a folder of your computer, appears as `data` in RStudio’s home directory: save your work there. For an R console only:
 
 ``` sh
 docker run -it ghcr.io/js2264/gene2scrnaseqintro:devel R
@@ -362,7 +365,7 @@ This workshop is adapted from the [BiocAfrica 2026 single-cell RNA-seq workshop]
 > ##   yaml                   2.3.12    2025-12-10 [2] RSPM (R 4.6.0)
 > ##   zip                    3.0.2     2026-08-04 [2] RSPM (R 4.6.0)
 > ##  
-> ##   [1] /tmp/Rtmpgs0rS5/Rinstb4783be7e
+> ##   [1] /tmp/Rtmp91yz7A/Rinstb238996e1
 > ##   [2] /usr/local/lib/R/site-library
 > ##   [3] /usr/local/lib/R/library
 > ##   * ── Packages attached to the search path.
