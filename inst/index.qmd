@@ -8,15 +8,15 @@ intro <- tryCatch(
         authors <- eval(parse(text = description$Authors))
         license <- description$License
         glue::glue(
-            "**Package:** {pkg}<br/>\n", 
-            "**Authors:** {paste(format(authors, include = c('given', 'family', 'role')), collapse = ', ')}<br/>\n", 
-            "**Compiled:** {as.character(Sys.Date())}<br/>\n", 
-            "**Package version:** {version}<br/>\n", 
-            "**R version:** <b style='color:red;'>{R.version.string}</b><br/>\n", 
-            "**BioC version:** <b style='color:red;'>{BiocManager::version()}</b><br/>\n", 
+            "**Package:** {pkg}<br/>\n",
+            "**Authors:** {paste(format(authors, include = c('given', 'family', 'role')), collapse = ', ')}<br/>\n",
+            "**Compiled:** {as.character(Sys.Date())}<br/>\n",
+            "**Package version:** {version}<br/>\n",
+            "**R version:** <b style='color:red;'>{R.version.string}</b><br/>\n",
+            "**BioC version:** <b style='color:red;'>{BiocManager::version()}</b><br/>\n",
             "**License:** {license}<br/>"
         )
-    }, 
+    },
     error = function(e) {"Local preview"}
 )
 ```
@@ -25,70 +25,119 @@ intro <- tryCatch(
 
 # Welcome {-}
 
-This is the landing page of the `BiocBook` entitled *...*.  
+This book supports a **2h30 live-coding workshop** on the analysis of
+single-cell RNA-seq data with [Bioconductor](https://bioconductor.org), taught
+in the *Single-Cell Omics and Spatial Transcriptomics* teaching unit of the
+GenE2 Master 2.
 
-This book introduces the reader to *...*.  
+Starting from the UMI count matrix of an adult human testis, you will learn to:
 
-# Docker image {-}
+- explain how a droplet-based experiment turns cells into a matrix of UMI
+  counts;
+- store and explore single-cell data in a `SingleCellExperiment`;
+- run the standard pre-processing workflow: quality control, normalisation,
+  feature selection, dimensionality reduction and batch correction;
+- cluster cells, find the genes that mark each cluster, and name the clusters,
+  by hand and against a public reference;
+- test for differential expression with pseudobulk samples, the unit of
+  replication being the donor, not the cell.
 
-A `Docker` image built from this repository is available here: 
+## How this book is organised {-}
 
-👉 [ghcr.io/js2264/gene2scrnaseqintro](https://ghcr.io/js2264/gene2scrnaseqintro) 🐳
+| Chapter | Content | When |
+|---|---|---|
+| @sec-10x | How a 10x Genomics experiment produces a count matrix | read **before** the session (~15 min) |
+| @sec-workshop | The hands-on session, all on one page | **live**, 2h30 |
 
-::: {.callout-tip icon='true'}
-## Get started now 🎉
+## What you need to know {-}
 
-You can get access to all the packages used in this book in < 1 minute, 
-using this command in a terminal: 
+Basic R: vectors, data frames, indexing with `[`, calling functions and loading
+packages with `library()`. No prior experience of Bioconductor is needed: the
+workshop introduces the containers it uses as it goes.
+
+# The workshop environment {-}
+
+Everything the workshop needs comes in a single `Docker` image, built from this
+repository by GitHub Actions: R, Bioconductor and every package of the book,
+plus the count matrix and the reference data, downloaded in advance.
+
+👉 [ghcr.io/js2264/gene2scrnaseqintro](https://github.com/js2264/GenE2-scRNAseq-intro/pkgs/container/gene2scrnaseqintro) 🐳
+
+## During the session: Orchestra {-}
+
+Each participant gets their own RStudio Server, running from the workshop image
+on the [Orchestra platform](https://orchestraplatform.org): nothing to install.
+
+1. Follow the link shared by the instructor, and launch the workshop: an
+   RStudio session opens in your browser (starting it can take a minute).
+2. Create a new R script (*File* > *New File* > *R Script*) and save it: this
+   is where you will type the code of the session.
+3. A copy of the workshop page, `workshop/workshop.qmd`, is in your home
+   directory, in case you lose track of the shared screen.
+
+::: {.callout-warning icon='true'}
+
+## Your instance is temporary
+
+Workshop instances do not last forever: download your script and anything else
+you want to keep (*Files* pane > *More* > *Export*) before the end of the day.
+
+:::
+
+## After the session: Docker {-}
+
+The same environment runs on any computer with Docker installed. Start an
+RStudio Server from the image:
+
+```{sh "rstudio", filename="bash"}
+#| eval: false
+docker run \
+    --volume <local_folder>:<destination_folder> \
+    -e PASSWORD=gene2 \
+    -p 8787:8787 \
+    ghcr.io/js2264/gene2scrnaseqintro:devel
+```
+
+then open [http://localhost:8787](http://localhost:8787) and log in as
+`rstudio`, with the password set above (`gene2`). For an R console only:
 
 ```{sh "docker", filename="bash"}
 #| eval: false
 docker run -it ghcr.io/js2264/gene2scrnaseqintro:devel R
 ```
 
-:::
+## On your own computer {-}
 
-# RStudio Server {-}
+You need R (>= 4.6.0), a recent Bioconductor and about 8 GB of RAM. The
+workshop's R package lists every package used in the book, so installing it
+with its dependencies installs them all:
 
-An RStudio Server instance can be initiated from the `Docker` image as follows: 
-
-```{sh "rstudio", filename="bash"}
+```{r "install"}
 #| eval: false
-docker run \
-    --volume <local_folder>:<destination_folder> \
-    -e PASSWORD=OHCA \
-    -p 8787:8787 \
-    ghcr.io/js2264/gene2scrnaseqintro:devel
+install.packages("BiocManager")
+BiocManager::install("js2264/GenE2-scRNAseq-intro", dependencies = TRUE)
 ```
 
-The initiated RStudio Server instance will be available at 
-[https://localhost:8787](https://localhost:8787).
+The count matrix is downloaded from GEO the first time you run the workshop
+code, and cached for later sessions.
 
-# `python` support {-}
+# The dataset {-}
 
-The `Docker` image ships the book's `conda` environment, holding everything
-listed in `inst/requirements.yml`. It is created at build time by
-`BiocBook::setup_python()`, which fetches a pinned `micromamba` if the machine
-has no `conda` at all.
+The hands-on session analyses the adult human testis atlas of @guo2018: 6,490
+cells from three healthy young donors, captured in two technical replicates
+each with the 10x Genomics Chromium platform
+([GSE112013](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE112013)).
+@sec-dataset explains why it makes a good teaching dataset.
 
-`reticulate` picks it up automatically, so `python` just works in any `R`
-session started from the image:
+# Acknowledgements {-}
 
-```{sh "python-env", filename="bash"}
-#| eval: false
-docker run -it ghcr.io/js2264/gene2scrnaseqintro:devel R
-```
-
-``` r
-library(reticulate)
-py_config()          # already points at the book's environment
-```
-
-To execute `python` in a book page, open the page with an `R` chunk calling
-`BiocBook::setup_python()` and write ```` ```{python} ```` chunks after it. Keep
-at least one `R` chunk on the page: that is what keeps `quarto` on the `knitr`
-engine, and therefore on `reticulate`, rather than on `jupyter`.
-
+This workshop is adapted from the
+[BiocAfrica 2026 single-cell RNA-seq workshop](https://js2264.github.io/BiocAfrica_scRNAseq2026/).
+Its workflow follows the
+[`scrapbook`](https://bioconductor.org/books/release/scrapbook/) and
+[OSCA](https://bioconductor.org/books/release/OSCA/) books
+[@amezquita2020], and it was written with
+[`BiocBook`](https://github.com/js2264/BiocBook) [@serizay2023].
 
 # Session info {-}
 
@@ -99,7 +148,7 @@ engine, and therefore on `reticulate`, rather than on `jupyter`.
 ```{r "session info"}
 #| cache: false
 sessioninfo::session_info(
-    installed.packages()[,"Package"], 
+    installed.packages()[,"Package"],
     include_base = TRUE
 )
 ```

@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" width="900" height="340" role="img" aria-label="The barcoded oligonucleotide of a 10x gel bead, and the structure of the sequencing library">
+  <rect x="0" y="0" width="900" height="340" fill="#ffffff"/>
+  <g font-family="Helvetica, Arial, sans-serif" fill="#16202b">
+
+    <!-- ===== A: the oligo on the bead ===== -->
+    <text x="24" y="28" font-size="14" font-weight="bold">A &#183; On each gel bead: millions of copies of one oligo</text>
+
+    <circle cx="56" cy="92" r="24" fill="#e0a45c" stroke="#a5651c" stroke-width="1.4"/>
+    <text x="56" y="96" font-size="10" text-anchor="middle" fill="#ffffff">bead</text>
+    <rect x="80"  y="84" width="80"  height="16" fill="#c9d4de"/>
+    <rect x="160" y="84" width="150" height="16" fill="#e0a45c"/>
+    <rect x="310" y="84" width="110" height="16" fill="#9b7cc4"/>
+    <rect x="420" y="84" width="110" height="16" fill="#68a86a"/>
+    <text x="475" y="96" font-size="10" text-anchor="middle" fill="#ffffff">TTTTTTTTTTTT</text>
+
+    <!-- captured mRNA, antiparallel: its poly(A) 3' end pairs with the poly(dT) -->
+    <text x="475" y="74" font-size="10" text-anchor="middle" fill="#a5651c">AAAAAAAAAAAA</text>
+    <path d="M530 70 Q540 62 550 70 Q560 78 570 70 Q580 62 590 70 Q600 78 610 70 Q620 62 630 70 Q640 78 650 70 Q660 62 670 70 Q680 78 690 70 Q700 62 710 70 Q720 78 730 70 Q740 62 750 70 Q760 78 770 70 Q780 62 790 70 Q800 78 810 70" stroke="#c98a4b" stroke-width="1.8" fill="none"/>
+    <text x="414" y="74" font-size="10" text-anchor="end" fill="#a5651c">3&#8242;</text>
+    <text x="820" y="74" font-size="10" fill="#a5651c">5&#8242;</text>
+    <text x="670" y="52" font-size="11" text-anchor="middle" fill="#a5651c">the captured mRNA</text>
+
+    <!-- cDNA synthesised by reverse transcription, extending the oligo -->
+    <path d="M530 92 L800 92" stroke="#4a8ec2" stroke-width="4" stroke-dasharray="7 4"/>
+    <polygon points="812,92 800,86 800,98" fill="#4a8ec2"/>
+    <text x="670" y="118" font-size="11" text-anchor="middle" fill="#2a5f8d">cDNA, written by reverse transcription</text>
+    <text x="670" y="132" font-size="11" text-anchor="middle" fill="#2a5f8d">inside the droplet</text>
+
+    <g font-size="11" text-anchor="middle">
+      <text x="120" y="118" fill="#3c4a58">primer site</text>
+      <text x="120" y="132" fill="#7a8896">for sequencing</text>
+      <text x="235" y="118" fill="#a5651c" font-weight="bold">cell barcode &#183; 16 nt</text>
+      <text x="235" y="132" fill="#7a8896">identical on the whole bead</text>
+      <text x="365" y="118" fill="#6b4c99" font-weight="bold">UMI &#183; 12 nt</text>
+      <text x="365" y="132" fill="#7a8896">different on every oligo</text>
+      <text x="475" y="146" fill="#37703a" font-weight="bold">poly(dT) &#183; 30 nt</text>
+      <text x="475" y="160" fill="#7a8896">catches poly(A) tails</text>
+    </g>
+
+    <!-- ===== B: the library and its reads ===== -->
+    <text x="24" y="200" font-size="14" font-weight="bold">B &#183; In the sequencing library: three reads, three questions</text>
+
+    <rect x="24"  y="218" width="40"  height="20" fill="#8896a4"/>
+    <rect x="64"  y="218" width="64"  height="20" fill="#c9d4de"/>
+    <rect x="128" y="218" width="96"  height="20" fill="#e0a45c"/>
+    <rect x="224" y="218" width="72"  height="20" fill="#9b7cc4"/>
+    <rect x="296" y="218" width="48"  height="20" fill="#68a86a"/>
+    <rect x="344" y="218" width="300" height="20" fill="#4a8ec2"/>
+    <rect x="644" y="218" width="64"  height="20" fill="#c9d4de"/>
+    <rect x="708" y="218" width="64"  height="20" fill="#d0605e"/>
+    <rect x="772" y="218" width="40"  height="20" fill="#8896a4"/>
+    <g font-size="10" text-anchor="middle" fill="#ffffff">
+      <text x="44"  y="232">P5</text><text x="176" y="232">barcode</text><text x="260" y="232">UMI</text>
+      <text x="320" y="232">T(30)</text><text x="494" y="232">cDNA insert: the 3&#8242; end of a transcript</text>
+      <text x="740" y="232">index</text><text x="792" y="232">P7</text>
+    </g>
+    <g font-size="10" text-anchor="middle" fill="#3c4a58">
+      <text x="96" y="232">Read 1 site</text><text x="676" y="232">Read 2 site</text>
+    </g>
+
+    <!-- reads -->
+    <path d="M128 252 L286 252" stroke="#a5651c" stroke-width="2"/>
+    <polygon points="296,252 286,247 286,257" fill="#a5651c"/>
+    <text x="128" y="272" font-size="11" fill="#a5651c" font-weight="bold">Read 1 &#183; 28 nt</text>
+    <text x="128" y="286" font-size="11" fill="#3c4a58">barcode: which cell?</text>
+    <text x="128" y="300" font-size="11" fill="#3c4a58">UMI: which molecule?</text>
+
+    <path d="M644 252 L466 252" stroke="#1f5fa0" stroke-width="2"/>
+    <polygon points="456,252 466,247 466,257" fill="#1f5fa0"/>
+    <text x="644" y="272" font-size="11" text-anchor="end" fill="#1f5fa0" font-weight="bold">Read 2 &#183; ~90 nt</text>
+    <text x="644" y="286" font-size="11" text-anchor="end" fill="#3c4a58">a piece of the transcript:</text>
+    <text x="644" y="300" font-size="11" text-anchor="end" fill="#3c4a58">which gene?</text>
+
+    <path d="M708 252 L762 252" stroke="#b54442" stroke-width="2"/>
+    <polygon points="772,252 762,247 762,257" fill="#b54442"/>
+    <text x="740" y="272" font-size="11" text-anchor="middle" fill="#b54442" font-weight="bold">index read</text>
+    <text x="740" y="286" font-size="11" text-anchor="middle" fill="#3c4a58">which sample?</text>
+
+    <text x="450" y="328" font-size="10.5" text-anchor="middle" fill="#7a8896">Chromium Single Cell 3&#8242; chemistry, v3 and later. The older v2 kits (2016 to 2018) used a 10-nt UMI.</text>
+  </g>
+</svg>

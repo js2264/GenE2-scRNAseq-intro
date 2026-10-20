@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 430" width="900" height="430" role="img" aria-label="Anatomy of a SingleCellExperiment object">
+  <rect x="0" y="0" width="900" height="430" fill="#ffffff"/>
+  <g font-family="Helvetica, Arial, sans-serif" fill="#16202b">
+
+    <text x="450" y="28" font-size="16" font-weight="bold" text-anchor="middle">SingleCellExperiment = SummarizedExperiment + what single-cell analysis needs</text>
+
+    <rect x="24" y="44" width="852" height="336" rx="12" fill="#fbfcfd" stroke="#c9d4de" stroke-width="1.6"/>
+
+    <!-- colData -->
+    <rect x="228" y="62" width="392" height="54" rx="6" fill="#fff3e2" stroke="#e0a45c" stroke-width="1.6"/>
+    <text x="424" y="84" font-size="13" font-weight="bold" text-anchor="middle" fill="#a5651c">colData(sce)</text>
+    <text x="424" y="103" font-size="11" text-anchor="middle" fill="#7c5220">one row per CELL &#183; Donor, Sample, sum, detected, subset.proportion.Mito, sizeFactor, cluster, celltype</text>
+
+    <!-- rowData -->
+    <rect x="40" y="130" width="170" height="196" rx="6" fill="#eef7ee" stroke="#68a86a" stroke-width="1.6"/>
+    <text x="125" y="152" font-size="13" font-weight="bold" text-anchor="middle" fill="#37703a">rowData(sce)</text>
+    <text x="125" y="176" font-size="11" text-anchor="middle" fill="#3f6b41">one row per GENE</text>
+    <text x="125" y="196" font-size="11" text-anchor="middle" fill="#3f6b41">gene annotation,</text>
+    <text x="125" y="212" font-size="11" text-anchor="middle" fill="#3f6b41">per-gene statistics,</text>
+    <text x="125" y="228" font-size="11" text-anchor="middle" fill="#3f6b41">hvg (TRUE/FALSE) &#8230;</text>
+
+    <!-- assays -->
+    <rect x="228" y="130" width="392" height="196" rx="6" fill="#eaf3fb" stroke="#4a8ec2" stroke-width="1.6"/>
+    <text x="424" y="152" font-size="13" font-weight="bold" text-anchor="middle" fill="#1f5fa0">assays(sce)</text>
+    <text x="424" y="170" font-size="11" text-anchor="middle" fill="#2a5f8d">genes &#215; cells matrices, all the same shape</text>
+
+    <rect x="262" y="186" width="320" height="46" rx="5" fill="#ffffff" stroke="#4a8ec2" stroke-width="1.4"/>
+    <text x="422" y="205" font-size="12" text-anchor="middle">counts</text>
+    <text x="422" y="222" font-size="10.5" text-anchor="middle" fill="#5b6b7c">raw UMI counts, sparse (dgCMatrix)</text>
+
+    <rect x="262" y="244" width="320" height="46" rx="5" fill="#ffffff" stroke="#4a8ec2" stroke-width="1.4"/>
+    <text x="422" y="263" font-size="12" text-anchor="middle">logcounts</text>
+    <text x="422" y="280" font-size="10.5" text-anchor="middle" fill="#5b6b7c">log2 normalised expression, added by logNormCounts()</text>
+
+    <text x="424" y="312" font-size="10.5" text-anchor="middle" fill="#5b6b7c">assay(sce, &quot;counts&quot;) &#183; counts(sce) &#183; logcounts(sce)</text>
+
+    <!-- reducedDims -->
+    <rect x="638" y="130" width="222" height="196" rx="6" fill="#f3edfa" stroke="#9b7cc4" stroke-width="1.6"/>
+    <text x="749" y="152" font-size="13" font-weight="bold" text-anchor="middle" fill="#6b4c99">reducedDims(sce)</text>
+    <text x="749" y="172" font-size="11" text-anchor="middle" fill="#5f4589">one row per CELL,</text>
+    <text x="749" y="188" font-size="11" text-anchor="middle" fill="#5f4589">a few columns</text>
+    <rect x="660" y="202" width="178" height="32" rx="4" fill="#ffffff" stroke="#9b7cc4" stroke-width="1.3"/>
+    <text x="749" y="223" font-size="11.5" text-anchor="middle">PCA (50 columns)</text>
+    <rect x="660" y="242" width="178" height="32" rx="4" fill="#ffffff" stroke="#9b7cc4" stroke-width="1.3"/>
+    <text x="749" y="263" font-size="11.5" text-anchor="middle">corrected (MNN, 20 columns)</text>
+    <rect x="660" y="282" width="178" height="32" rx="4" fill="#ffffff" stroke="#9b7cc4" stroke-width="1.3"/>
+    <text x="749" y="303" font-size="11.5" text-anchor="middle">UMAP, UMAP_corrected (2 col.)</text>
+
+    <!-- bottom bar -->
+    <rect x="40" y="340" width="820" height="26" rx="5" fill="#f1f3f5" stroke="#c9d4de" stroke-width="1.2"/>
+    <text x="450" y="358" font-size="11.5" text-anchor="middle" fill="#3c4a58">metadata(sce) &#183; sizeFactors(sce) &#183; altExps(sce) &#8212; anything else that travels with the experiment</text>
+
+    <text x="450" y="404" font-size="12" text-anchor="middle" fill="#3c4a58">Subsetting works like a matrix: <tspan font-weight="bold">sce[genes, cells]</tspan> keeps assays, rowData, colData and reducedDims in sync.</text>
+    <text x="450" y="422" font-size="11" text-anchor="middle" fill="#7a8896">That is the whole point of the container: you can never accidentally mismatch a cell with its metadata.</text>
+  </g>
+</svg>
