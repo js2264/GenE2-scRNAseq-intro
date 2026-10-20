@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.11.5">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>1&nbsp; From cells to counts: the 10x Genomics workflow – Introduction to single-cell RNA-seq analysis</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../pages/workshop.html" rel="next">
+<link href="../index.html" rel="prev">
+<link href="../assets/favicon.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-5f883865545033bfab6feb3d329ab180.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-389a472ee631af36ae83c0184533fd26.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar docked quarto-light"><a id="quarto-skip-link" class="visually-hidden-focusable" href="#quarto-document-content">Skip to main content</a>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" aria-label="Toolbar">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../pages/from-cells-to-counts.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">From cells to counts: the 10x Genomics workflow</span></a></li></ol></nav>
+        <a class="flex-grow-1" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto" aria-label="Site">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Introduction to single-cell RNA-seq analysis</a> 
+        <div class="sidebar-tools-main">
+    <div class="dropdown">
+      <a href="" title="" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label=""><i class="bi bi-git"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://github.com/js2264/GenE2-scRNAseq-intro/">
+            Source Code
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://js2264.github.io/GenE2-scRNAseq-intro/devel/">
+            Browse version `devel`
+            </a>
+          </li>
+      </ul>
+    </div>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/from-cells-to-counts.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">From cells to counts: the 10x Genomics workflow</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/workshop.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Hands-on: from a count matrix to cell types</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" aria-labelledby="toc-title" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-dissociation" id="toc-sec-dissociation" class="nav-link active" data-scroll-target="#sec-dissociation"><span class="header-section-number">1.1</span> A suspension of single, living cells</a></li>
+  <li><a href="#sec-gems" id="toc-sec-gems" class="nav-link" data-scroll-target="#sec-gems"><span class="header-section-number">1.2</span> One cell, one droplet, one barcode</a>
+  <ul class="collapse">
+  <li><a href="#what-is-on-a-gel-bead" id="toc-what-is-on-a-gel-bead" class="nav-link" data-scroll-target="#what-is-on-a-gel-bead"><span class="header-section-number">1.2.1</span> What is on a gel bead?</a></li>
+  <li><a href="#inside-the-droplet" id="toc-inside-the-droplet" class="nav-link" data-scroll-target="#inside-the-droplet"><span class="header-section-number">1.2.2</span> Inside the droplet</a></li>
+  </ul></li>
+  <li><a href="#sec-library" id="toc-sec-library" class="nav-link" data-scroll-target="#sec-library"><span class="header-section-number">1.3</span> Pool, amplify, build a library</a></li>
+  <li><a href="#sec-reads" id="toc-sec-reads" class="nav-link" data-scroll-target="#sec-reads"><span class="header-section-number">1.4</span> Three reads, three questions</a></li>
+  <li><a href="#sec-cellranger" id="toc-sec-cellranger" class="nav-link" data-scroll-target="#sec-cellranger"><span class="header-section-number">1.5</span> From reads to counts</a></li>
+  <li><a href="#sec-count-matrix" id="toc-sec-count-matrix" class="nav-link" data-scroll-target="#sec-count-matrix"><span class="header-section-number">1.6</span> The count matrix</a></li>
+  <li><a href="#sec-dataset" id="toc-sec-dataset" class="nav-link" data-scroll-target="#sec-dataset"><span class="header-section-number">1.7</span> The dataset of the hands-on session</a></li>
+  <li><a href="#going-further" id="toc-going-further" class="nav-link" data-scroll-target="#going-further">Going further</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content" tabindex="-1">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-10x" class="quarto-section-identifier"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">From cells to counts: the 10x Genomics workflow</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Read this chapter before the session
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>It takes about 15 minutes and needs no R. The hands-on session starts where this chapter ends: with a count matrix.</p>
+</div>
+</div>
+<p>Bulk RNA-seq measures the <strong>average</strong> transcriptome of thousands to millions of cells. That average hides what single-cell RNA-seq (scRNA-seq) is designed to reveal: which cell types a tissue contains, in which proportions, which states they go through, and which genes define each of them. A bulk profile of a testis mixes stem cells, dividing spermatogonia, meiotic spermatocytes, spermatids and a handful of somatic cell types into a single vector of numbers; the dataset of the hands-on session separates them again, cell by cell.</p>
+<p>Many scRNA-seq technologies exist. The most widely used today isolates cells in <strong>droplets</strong>, and its most common implementation is the Chromium platform of 10x Genomics <span class="citation" data-cites="zheng2017">(<a href="#ref-zheng2017" role="doc-biblioref"><span class="nocase">Zheng et al.</span> 2017</a>)</span>. This chapter follows a sample through that workflow, from a piece of tissue to the object every analysis starts from: a <strong>count matrix</strong> of genes × cells (<a href="#fig-10x" class="quarto-xref">Figure&nbsp;<span>1.1</span></a>).</p>
+<div id="fig-10x" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-10x-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/10x-workflow.svg" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-10x-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.1: The 10x Genomics Chromium workflow. The wet-lab steps give every molecule the barcode of its cell; the dry-lab steps read the barcodes back to count molecules per gene and per cell.
+</figcaption>
+</figure>
+</div>
+<section id="sec-dissociation" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="sec-dissociation"><span class="header-section-number">1.1</span> A suspension of single, living cells</h2>
+<p>Everything starts with <strong>dissociation</strong>: the tissue is digested, enzymatically and mechanically, into a suspension of single cells, which is then filtered, counted and checked for viability. That step shapes the data more than any later one:</p>
+<ul>
+<li>cells that do not survive the digestion, or are too large, too fragile or too sticky, end up under-represented or missing;</li>
+<li>stressed cells switch on immediate-early genes (<em>FOS</em>, <em>JUN</em>, heat-shock genes…): a well-known <strong>dissociation signature</strong>;</li>
+<li>dying cells leak their cytoplasmic mRNA through a damaged membrane. You will recognise them in the quality control of the hands-on session, by their high fraction of mitochondrial transcripts.</li>
+</ul>
+<p>When a tissue cannot be dissociated (frozen archives, neurons, adipocytes…), nuclei are isolated instead, and the experiment becomes <strong>single-nucleus</strong> RNA-seq (snRNA-seq). The rest of the workflow is the same.</p>
+</section>
+<section id="sec-gems" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="sec-gems"><span class="header-section-number">1.2</span> One cell, one droplet, one barcode</h2>
+<p>The cell suspension is loaded on a microfluidic chip together with <strong>gel beads</strong> and <strong>oil</strong>. Where the channels meet, the oil cuts the aqueous flow into tiny droplets, each carrying one gel bead: the <strong>GEMs</strong> (<em>Gel beads-in-EMulsion</em>).</p>
+<p>Cells are loaded at a low concentration, so that a droplet rarely receives more than one. The price is that <strong>most droplets contain a bead but no cell</strong>, and that a few receive two cells or more: a <strong>doublet</strong>, which will look like a single cell with a hybrid profile. The doublet rate grows with the number of cells loaded: with the Chromium 3’ chemistry it is roughly 0.8% per 1,000 cells recovered, so about 8% in a 10,000-cell experiment.</p>
+<section id="what-is-on-a-gel-bead" class="level3" data-number="1.2.1">
+<h3 data-number="1.2.1" class="anchored" data-anchor-id="what-is-on-a-gel-bead"><span class="header-section-number">1.2.1</span> What is on a gel bead?</h3>
+<p>Each bead carries millions of copies of a DNA oligonucleotide made of four parts (<a href="#fig-oligo" class="quarto-xref">Figure&nbsp;<span>1.2</span></a> A):</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Part</th>
+<th>Same on…</th>
+<th>Tells you</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>primer site</td>
+<td>every oligo of every bead</td>
+<td>where sequencing starts</td>
+</tr>
+<tr class="even">
+<td><strong>cell barcode</strong> (16 nt)</td>
+<td>all the oligos of one bead</td>
+<td>which droplet, hence which <strong>cell</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>UMI</strong> (<em>Unique Molecular Identifier</em>, 12 nt)</td>
+<td>nothing: random on each oligo</td>
+<td>which <strong>molecule</strong></td>
+</tr>
+<tr class="even">
+<td>poly(dT) (30 nt)</td>
+<td>every oligo</td>
+<td>nothing: it catches the poly(A) tail of mRNAs</td>
+</tr>
+</tbody>
+</table>
+<p>The beads are made from millions of possible barcodes, so two beads of the same experiment almost never share one.</p>
+<div id="fig-oligo" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-oligo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/oligo.svg" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-oligo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.2: The oligonucleotide of a 10x gel bead (A), and the structure of the library that is eventually sequenced (B).
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="inside-the-droplet" class="level3" data-number="1.2.2">
+<h3 data-number="1.2.2" class="anchored" data-anchor-id="inside-the-droplet"><span class="header-section-number">1.2.2</span> Inside the droplet</h3>
+<p>In each GEM, the gel bead dissolves and releases its oligos, the cell is lysed, and its polyadenylated mRNAs hybridise to the poly(dT). A reverse transcriptase copies each captured mRNA into a cDNA that starts with the oligo: <strong>every cDNA now carries the barcode of its droplet and a UMI of its own</strong>. The enzyme also adds a few bases at the end of the cDNA, onto which a <em>template-switch oligo</em> binds, so that all cDNAs end up with known sequences at both ends and can be amplified together with a single pair of primers.</p>
+<p>This is the whole trick of droplet scRNA-seq: from then on, molecules from all cells can be mixed in one tube, because each one carries the address of its cell.</p>
+<p>The capture is far from complete: only a fraction of the mRNA molecules of each cell is caught and copied. This is where the many zeros of the count matrix come from.</p>
+</section>
+</section>
+<section id="sec-library" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="sec-library"><span class="header-section-number">1.3</span> Pool, amplify, build a library</h2>
+<p>The emulsion is then broken, and the barcoded cDNAs of all cells are pooled. They are amplified by PCR, fragmented, and fitted with Illumina adapters and a <strong>sample index</strong>, which lets several libraries share a sequencing run. Only the fragments that contain the 3’ end of a transcript keep the barcode and the UMI (<a href="#fig-oligo" class="quarto-xref">Figure&nbsp;<span>1.2</span></a> B): the library tells you <strong>which transcripts</strong> a cell contained, and how many, not their full-length sequence. Other kits read the 5’ end instead, mostly to profile immune receptors.</p>
+<p>PCR copies some molecules more than others. This is exactly what UMIs are for: all the copies of one original molecule share the same barcode, the same UMI and the same gene, so they can be collapsed back into a single count.</p>
+</section>
+<section id="sec-reads" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="sec-reads"><span class="header-section-number">1.4</span> Three reads, three questions</h2>
+<p>The library is sequenced on an Illumina instrument, and each fragment gives (<a href="#fig-oligo" class="quarto-xref">Figure&nbsp;<span>1.2</span></a> B):</p>
+<ul>
+<li><strong>Read 1</strong> (28 nt): the barcode and the UMI. <em>Which cell? Which molecule?</em></li>
+<li><strong>Read 2</strong> (typically 90 nt): a piece of the transcript. <em>Which gene?</em></li>
+<li>the <strong>index read(s)</strong>: the sample index. <em>Which sample?</em></li>
+</ul>
+<p>A common target is 20,000 to 50,000 read pairs per cell.</p>
+</section>
+<section id="sec-cellranger" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="sec-cellranger"><span class="header-section-number">1.5</span> From reads to counts</h2>
+<p>10x Genomics’ software, <strong>Cell Ranger</strong> (<code>cellranger count</code>), turns the sequencing reads (FASTQ files) into a count matrix in four steps:</p>
+<ol type="1">
+<li><strong>Barcodes.</strong> Each barcode read is checked against the list of barcodes present on the beads, and corrected when a single base is off.</li>
+<li><strong>Alignment.</strong> Read 2 is aligned to the reference genome and assigned to a gene when it falls in its exons or, by default since Cell Ranger 7, its introns.</li>
+<li><strong>UMI counting.</strong> Reads with the same barcode, the same UMI and the same gene are copies of one molecule: they count once. A number in the matrix is a number of <strong>molecules</strong>, not of reads.</li>
+<li><strong>Cell calling.</strong> Barcodes are ranked by their total number of UMIs (<a href="#fig-knee" class="quarto-xref">Figure&nbsp;<span>1.3</span></a>). Droplets with a cell have many; empty droplets, much more numerous, have a few, coming from the <em>ambient RNA</em> that floats in the suspension (often released by damaged cells). Cell Ranger keeps the barcodes above the “knee” of that curve, then rescues lower-count barcodes whose profile differs from the ambient one, an approach called EmptyDrops <span class="citation" data-cites="lun2019">(<a href="#ref-lun2019" role="doc-biblioref"><span class="nocase">Lun et al.</span> 2019</a>)</span>.</li>
+</ol>
+<div id="fig-knee" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-knee-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/knee-plot.svg" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-knee-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.3: A barcode-rank plot, the curve every 10x experiment is first judged on.
+</figcaption>
+</figure>
+</div>
+<p>Other tools do the same job, often faster: STARsolo, alevin-fry, kallisto | bustools.</p>
+<p>Among other things, Cell Ranger writes:</p>
+<ul>
+<li><code>web_summary.html</code>, a quality report (number of cells, reads per cell, median genes per cell…): always the first file to open;</li>
+<li><code>raw_feature_bc_matrix/</code>, the counts of <strong>all</strong> barcodes, empty droplets included;</li>
+<li><code>filtered_feature_bc_matrix/</code>, the counts of the barcodes called as cells.</li>
+</ul>
+<p>Each matrix is stored in a sparse format of three files:</p>
+<pre><code>filtered_feature_bc_matrix/
+├── barcodes.tsv.gz   # one line per cell (columns)
+├── features.tsv.gz   # one line per gene (rows): Ensembl ID, symbol
+└── matrix.mtx.gz     # only the non-zero entries: row, column, count</code></pre>
+<p>which the <code>DropletUtils</code> package reads straight into a <code>SingleCellExperiment</code>, the object of the hands-on session:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DropletUtils)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>sce <span class="ot">&lt;-</span> <span class="fu">read10xCounts</span>(<span class="st">"path/to/filtered_feature_bc_matrix"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="sec-count-matrix" class="level2" data-number="1.6">
+<h2 data-number="1.6" class="anchored" data-anchor-id="sec-count-matrix"><span class="header-section-number">1.6</span> The count matrix</h2>
+<div id="fig-matrix" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-matrix-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/count-matrix.svg" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-matrix-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.4: Anatomy of a single-cell count matrix.
+</figcaption>
+</figure>
+</div>
+<p>Three ideas to carry into the hands-on session:</p>
+<ul>
+<li><strong>A column is one cell.</strong> Its ~20,000 numbers are that cell’s transcriptome, as far as it was captured.</li>
+<li><strong>An entry is a UMI count</strong>: the number of distinct molecules of that gene captured in that cell. Not reads: molecules. That is why the numbers are small.</li>
+<li><strong>Most entries are zero</strong>, and a zero is ambiguous: the gene may be off, or on but missed by a capture that only catches a fraction of the mRNAs of a cell. Almost every step of the analysis is designed around that ambiguity.</li>
+</ul>
+<p>Cell calling does not make every column a good cell either: some barcodes are empty droplets that passed the threshold, some are damaged or dying cells, some are doublets. Finding them is the first job of the hands-on session.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Spatial transcriptomics uses the same trick
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Sequencing-based spatial methods, such as 10x Visium, reuse the barcode + UMI logic. Instead of a bead per droplet, a glass slide carries spots of oligos with a <strong>spatial barcode</strong>: the barcode no longer tells which cell a molecule came from, but <strong>where</strong> in the tissue section it was captured. The result is again a count matrix, of genes × spots.</p>
+</div>
+</div>
+</section>
+<section id="sec-dataset" class="level2" data-number="1.7">
+<h2 data-number="1.7" class="anchored" data-anchor-id="sec-dataset"><span class="header-section-number">1.7</span> The dataset of the hands-on session</h2>
+<p>We will analyse the adult human testis atlas of <span class="citation" data-cites="guo2018"><span class="nocase">Guo et al.</span> (<a href="#ref-guo2018" role="doc-biblioref">2018</a>)</span>: testicular tissue from three healthy young donors, each dissociated and captured on the 10x Chromium platform in two technical replicates. The authors processed the reads with Cell Ranger and deposited a single table of UMI counts for 6,490 cells on GEO (<a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE112013">GSE112013</a>): that table is where we start.</p>
+<p>The testis is a good teaching tissue because it holds two very different kinds of biology at once (<a href="#fig-testis" class="quarto-xref">Figure&nbsp;<span>1.5</span></a>): a <strong>continuous differentiation trajectory</strong>, the germ cells going through spermatogenesis, and a few <strong>discrete populations</strong> of somatic cells. Both will show up on the same map of the cells.</p>
+<div id="fig-testis" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-testis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/testis.svg" class="img-fluid figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-testis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.5: Cell types of the adult human testis, and the marker genes we will use to recognise them.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="going-further" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="going-further">Going further</h2>
+<ul>
+<li><span class="citation" data-cites="zheng2017"><span class="nocase">Zheng et al.</span> (<a href="#ref-zheng2017" role="doc-biblioref">2017</a>)</span> describe the droplet technology behind the 10x Chromium platform.</li>
+<li>The <a href="https://www.10xgenomics.com/support/software/cell-ranger">Cell Ranger documentation</a> details each step of the processing, and how to read its <code>web_summary.html</code>.</li>
+<li><span class="citation" data-cites="luecken2019">Luecken and Theis (<a href="#ref-luecken2019" role="doc-biblioref">2019</a>)</span> and <span class="citation" data-cites="heumos2023"><span class="nocase">Heumos et al.</span> (<a href="#ref-heumos2023" role="doc-biblioref">2023</a>)</span> review the analysis steps of the hands-on session, and their alternatives.</li>
+</ul>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-guo2018" class="csl-entry" role="listitem">
+<span class="nocase">Guo, Jingtao, Edward J. Grow, Hana Mlcochova, Geoffrey J. Maher, Cecilia Lindskog, et al.</span> 2018. <span>“The Adult Human Testis Transcriptional Cell Atlas.”</span> <em>Cell Research</em> 28: 1141–57. <a href="https://doi.org/10.1038/s41422-018-0099-2">https://doi.org/10.1038/s41422-018-0099-2</a>.
+</div>
+<div id="ref-heumos2023" class="csl-entry" role="listitem">
+<span class="nocase">Heumos, Lukas, Anna C. Schaar, Christopher Lance, et al.</span> 2023. <span>“Best Practices for Single-Cell Analysis Across Modalities.”</span> <em>Nature Reviews Genetics</em> 24: 550–72. <a href="https://doi.org/10.1038/s41576-023-00586-w">https://doi.org/10.1038/s41576-023-00586-w</a>.
+</div>
+<div id="ref-luecken2019" class="csl-entry" role="listitem">
+Luecken, Malte D., and Fabian J. Theis. 2019. <span>“Current Best Practices in Single-Cell <span class="nocase">RNA-seq</span> Analysis: A Tutorial.”</span> <em>Molecular Systems Biology</em> 15: e8746. <a href="https://doi.org/10.15252/msb.20188746">https://doi.org/10.15252/msb.20188746</a>.
+</div>
+<div id="ref-lun2019" class="csl-entry" role="listitem">
+<span class="nocase">Lun, Aaron T. L., Samantha Riesenfeld, Tallulah Andrews, et al.</span> 2019. <span>“<span>EmptyDrops</span>: Distinguishing Cells from Empty Droplets in Droplet-Based Single-Cell <span>RNA</span> Sequencing Data.”</span> <em>Genome Biology</em> 20: 63. <a href="https://doi.org/10.1186/s13059-019-1662-y">https://doi.org/10.1186/s13059-019-1662-y</a>.
+</div>
+<div id="ref-zheng2017" class="csl-entry" role="listitem">
+<span class="nocase">Zheng, Grace X. Y., Jessica M. Terry, Phillip Belgrader, et al.</span> 2017. <span>“Massively Parallel Digital Transcriptional Profiling of Single Cells.”</span> <em>Nature Communications</em> 8: 14049. <a href="https://doi.org/10.1038/ncomms14049">https://doi.org/10.1038/ncomms14049</a>.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation" aria-label="Page">
+  <div class="nav-page nav-page-previous">
+      <a href="../index.html" class="pagination-link" aria-label="Welcome">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Welcome</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../pages/workshop.html" class="pagination-link" aria-label="Hands-on: from a count matrix to cell types">
+        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Hands-on: from a count matrix to cell types</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>This book was built with <a href="https://github.com/js2264/BiocBook/">BiocBook</a> with <span class="emoji" data-emoji="heart">❤️</span></p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

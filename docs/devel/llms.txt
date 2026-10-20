@@ -1,0 +1,16 @@
+# Introduction to single-cell RNA-seq analysis
+
+> A live-coding workshop introducing single-cell RNA-seq analysis with Bioconductor, written for the Master 2 GenE2 "Single-Cell Omics and Spatial Transcriptomics" teaching unit. A short introduction explains how 10x Genomics droplet-based experiments turn a tissue into a matrix of UMI counts. The 2h30 hands-on session then starts from the count matrix of the adult human testis (Guo et al. 2018, GEO accession GSE112013) and walks through the standard Bioconductor workflow: building a SingleCellExperiment, quality control, normalisation, feature selection, dimensionality reduction, batch correction, clustering, marker genes, reference-based annotation with SingleR and pseudobulk differential expression with DESeq2.
+
+<!-- biocbook:start -->
+- Book package: `GenE2scRNAseqIntro` 0.99.0 (Bioconductor 3.24), source: <https://github.com/js2264/GenE2-scRNAseq-intro>
+- Install: `BiocManager::install("GenE2scRNAseqIntro")` (Bioconductor) or `BiocManager::install("js2264/GenE2-scRNAseq-intro")` (GitHub)
+- Docker image with every dependency: `docker run -it ghcr.io/js2264/gene2scrnaseqintro:0.99.0 R`
+- Other versions of this book: one per Bioconductor release, at `https://js2264.github.io/GenE2-scRNAseq-intro/<version>/` (e.g. <https://js2264.github.io/GenE2-scRNAseq-intro/devel/>), indexed in <https://js2264.github.io/GenE2-scRNAseq-intro/llms.txt>
+<!-- biocbook:end -->
+
+## Pages
+
+- [Introduction to single-cell RNA-seq analysis](index.llms.md)
+- [1 From cells to counts: the 10x Genomics workflow](pages/from-cells-to-counts.llms.md)
+- [2 Hands-on: from a count matrix to cell types](pages/workshop.llms.md)
