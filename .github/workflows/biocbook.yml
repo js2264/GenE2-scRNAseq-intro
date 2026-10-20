@@ -62,10 +62,13 @@ jobs:
         uses: docker/metadata-action@v6
         with:
           images: ghcr.io/${{ env.owner }}/${{ env.pkgname }}
+          ## The short SHA of the commit is the one tag never re-pushed with
+          ## different content: point workshop platforms (e.g. Orchestra) at it
           tags: |
             type=ref,event=branch
             ${{ env.pkgversion }}
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'devel') }}
+            type=sha,prefix=
 
       - name: 📦 Install, build and check package in local Docker image
         id: docker

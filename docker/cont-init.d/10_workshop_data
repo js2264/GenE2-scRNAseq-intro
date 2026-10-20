@@ -1,0 +1,11 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+## Workshop platforms such as Orchestra mount each participant's persistent
+## workspace at /data, owned by root: hand it to the RStudio user, so that they
+## can save their work there. Only the top directory (what they create in it is
+## theirs already), and only when root owns it, so that a folder bind-mounted
+## with `docker run -v` keeps its owner
+if [ -d /data ] && [ "$(stat -c %u /data)" = "0" ]; then
+    chown "${DEFAULT_USER:-rstudio}:${DEFAULT_USER:-rstudio}" /data
+fi
