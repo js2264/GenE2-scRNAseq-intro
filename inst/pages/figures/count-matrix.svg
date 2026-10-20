@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" width="900" height="400" role="img" aria-label="Anatomy of a single-cell UMI count matrix">
+  <rect x="0" y="0" width="900" height="400" fill="#ffffff"/>
+  <g font-family="Helvetica, Arial, sans-serif" fill="#16202b">
+
+    <text x="450" y="30" font-size="16" font-weight="bold" text-anchor="middle">A single-cell count matrix</text>
+
+    <!-- column header -->
+    <text x="330" y="66" font-size="12" text-anchor="middle" fill="#5b6b7c">cells (columns) &#8212; one column = one cell</text>
+    <path d="M150 74 L510 74" stroke="#9bb3c7" stroke-width="1.4"/>
+    <polygon points="514,74 504,69 504,79" fill="#9bb3c7"/>
+
+    <!-- row header -->
+    <text x="52" y="200" font-size="12" text-anchor="middle" fill="#5b6b7c" transform="rotate(-90 52 200)">genes (rows)</text>
+    <path d="M74 90 L74 320" stroke="#9bb3c7" stroke-width="1.4"/>
+    <polygon points="74,324 69,314 79,314" fill="#9bb3c7"/>
+
+    <!-- barcode labels -->
+    <g font-size="9" fill="#5b6b7c" text-anchor="middle">
+      <text x="122" y="90">Donor1.</text><text x="122" y="99">AAAC….1</text>
+      <text x="182" y="90">Donor1.</text><text x="182" y="99">AACG….1</text>
+      <text x="242" y="90">Donor1.</text><text x="242" y="99">ACTG….2</text>
+      <text x="302" y="94">&#8230;</text>
+      <text x="362" y="90">Donor3.</text><text x="362" y="99">TTCG….2</text>
+    </g>
+
+    <!-- grid -->
+    <g stroke="#d5dee6" stroke-width="1">
+      <rect x="92"  y="106" width="60" height="34" fill="#ffffff"/>
+      <rect x="152" y="106" width="60" height="34" fill="#eaf3fb"/>
+      <rect x="212" y="106" width="60" height="34" fill="#ffffff"/>
+      <rect x="272" y="106" width="60" height="34" fill="#ffffff"/>
+      <rect x="332" y="106" width="60" height="34" fill="#ffffff"/>
+
+      <rect x="92"  y="140" width="60" height="34" fill="#ffffff"/>
+      <rect x="152" y="140" width="60" height="34" fill="#eaf3fb"/>
+      <rect x="212" y="140" width="60" height="34" fill="#cfe4f6"/>
+      <rect x="272" y="140" width="60" height="34" fill="#ffffff"/>
+      <rect x="332" y="140" width="60" height="34" fill="#ffffff"/>
+
+      <rect x="92"  y="174" width="60" height="34" fill="#cfe4f6"/>
+      <rect x="152" y="174" width="60" height="34" fill="#eaf3fb"/>
+      <rect x="212" y="174" width="60" height="34" fill="#ffffff"/>
+      <rect x="272" y="174" width="60" height="34" fill="#ffffff"/>
+      <rect x="332" y="174" width="60" height="34" fill="#ffffff"/>
+
+      <rect x="92"  y="208" width="60" height="34" fill="#ffffff"/>
+      <rect x="152" y="208" width="60" height="34" fill="#eaf3fb"/>
+      <rect x="212" y="208" width="60" height="34" fill="#ffffff"/>
+      <rect x="272" y="208" width="60" height="34" fill="#ffffff"/>
+      <rect x="332" y="208" width="60" height="34" fill="#a8cdec"/>
+
+      <rect x="92"  y="242" width="60" height="34" fill="#ffffff"/>
+      <rect x="152" y="242" width="60" height="34" fill="#eaf3fb"/>
+      <rect x="212" y="242" width="60" height="34" fill="#ffffff"/>
+      <rect x="272" y="242" width="60" height="34" fill="#ffffff"/>
+      <rect x="332" y="242" width="60" height="34" fill="#ffffff"/>
+
+      <rect x="92"  y="276" width="60" height="34" fill="#ffffff"/>
+      <rect x="152" y="276" width="60" height="34" fill="#eaf3fb"/>
+      <rect x="212" y="276" width="60" height="34" fill="#ffffff"/>
+      <rect x="272" y="276" width="60" height="34" fill="#ffffff"/>
+      <rect x="332" y="276" width="60" height="34" fill="#ffffff"/>
+    </g>
+
+    <!-- values -->
+    <g font-size="12" text-anchor="middle" fill="#16202b">
+      <text x="122" y="128">0</text><text x="182" y="128">0</text><text x="242" y="128">0</text><text x="302" y="128">&#8230;</text><text x="362" y="128">0</text>
+      <text x="122" y="162">0</text><text x="182" y="162">3</text><text x="242" y="162">11</text><text x="302" y="162">&#8230;</text><text x="362" y="162">0</text>
+      <text x="122" y="196">7</text><text x="182" y="196">0</text><text x="242" y="196">0</text><text x="302" y="196">&#8230;</text><text x="362" y="196">0</text>
+      <text x="122" y="230">0</text><text x="182" y="230">1</text><text x="242" y="230">0</text><text x="302" y="230">&#8230;</text><text x="362" y="230">42</text>
+      <text x="122" y="264">0</text><text x="182" y="264">0</text><text x="242" y="264">0</text><text x="302" y="264">&#8230;</text><text x="362" y="264">0</text>
+      <text x="122" y="298">0</text><text x="182" y="298">2</text><text x="242" y="298">0</text><text x="302" y="298">&#8230;</text><text x="362" y="298">0</text>
+    </g>
+
+    <!-- gene labels -->
+    <g font-size="10" text-anchor="end" fill="#5b6b7c">
+      <text x="88" y="128">UTF1</text>
+      <text x="88" y="162">DMRT1</text>
+      <text x="88" y="196">SOX9</text>
+      <text x="88" y="230">PRM2</text>
+      <text x="88" y="264">CD14</text>
+      <text x="88" y="298">MT-CO1</text>
+    </g>
+
+    <!-- highlight a column -->
+    <rect x="152" y="106" width="60" height="204" fill="none" stroke="#2c6fb3" stroke-width="2"/>
+    <path d="M212 208 L440 190" stroke="#2c6fb3" stroke-width="1.3" fill="none"/>
+    <text x="450" y="186" font-size="12" fill="#1f5fa0">one cell&#8217;s whole transcriptome</text>
+    <text x="450" y="203" font-size="11" fill="#5b6b7c">a vector of ~20 000 counts</text>
+
+    <!-- highlight an entry -->
+    <rect x="212" y="140" width="60" height="34" fill="none" stroke="#c2571a" stroke-width="2"/>
+    <path d="M272 150 L440 128" stroke="#c2571a" stroke-width="1.3" fill="none"/>
+    <text x="450" y="124" font-size="12" fill="#b04d16">one entry = 11 UMIs</text>
+    <text x="450" y="141" font-size="11" fill="#5b6b7c">11 distinct DMRT1 molecules captured in that cell</text>
+
+    <!-- notes -->
+    <g font-size="12" fill="#16202b">
+      <text x="450" y="248" font-weight="bold">Two things make it different from a bulk matrix</text>
+      <text x="450" y="270" font-size="11.5" fill="#3c4a58">1. It is huge: ~20 000 genes &#215; thousands to millions of cells.</text>
+      <text x="450" y="290" font-size="11.5" fill="#3c4a58">2. It is mostly zeros (90&#8211;95%): most genes are simply not</text>
+      <text x="466" y="307" font-size="11.5" fill="#3c4a58">detected in most cells &#8212; so we store it as a sparse matrix.</text>
+    </g>
+
+    <text x="450" y="352" font-size="11.5" text-anchor="middle" fill="#5b6b7c">A zero can mean &#8220;not expressed&#8221; or &#8220;expressed but not captured&#8221;. The whole workflow is built around that ambiguity.</text>
+    <text x="450" y="378" font-size="11" text-anchor="middle" fill="#7a8896">Guo et al. 2018 &#183; GSE112013 &#183; adult human testis &#183; 6 490 cells from 3 donors</text>
+  </g>
+</svg>

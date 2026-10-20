@@ -1,0 +1,1189 @@
+---
+knitr:
+  opts_chunk:
+    message: false
+    fig.width: 7
+    fig.height: 4.5
+---
+
+# Hands-on: from a count matrix to cell types {#sec-workshop}
+
+In 2h30, we go from the count matrix described in @sec-10x to a map of the
+adult human testis with a name on every population, and to a first
+differential expression analysis. Every step adds something to **one object**,
+a `SingleCellExperiment`, which grows as we go (@fig-workflow).
+
+![The standard Bioconductor single-cell workflow, in two parts separated by a
+break.](figures/workflow.svg){#fig-workflow width=100%}
+
+| Time | Section | Duration |
+|---|---|---|
+| 0:00 | [Setup](#sec-setup) | 5 min |
+| 0:05 | [Reading the count matrix](#sec-read) | 10 min |
+| 0:15 | [The `SingleCellExperiment`](#sec-sce) | 15 min |
+| 0:30 | [Quality control](#sec-qc) | 15 min |
+| 0:45 | [Normalisation](#sec-norm) | 10 min |
+| 0:55 | [Feature selection](#sec-hvg) | 5 min |
+| 1:00 | [Dimensionality reduction](#sec-dimred) | 10 min |
+| 1:10 | [Batch effects](#sec-batch) | 10 min |
+| 1:20 | ☕ [Break, and checkpoint](#sec-checkpoint) | 10 min |
+| 1:30 | [Clustering](#sec-clustering) | 15 min |
+| 1:45 | [Marker genes](#sec-markers) | 15 min |
+| 2:00 | [Annotation with a reference](#sec-annotation) | 10 min |
+| 2:10 | [Pseudobulk differential expression](#sec-pseudobulk) | 15 min |
+| 2:25 | [Wrap-up](#sec-wrap-up) | 5 min |
+
+::: {.callout-tip icon='true'}
+
+## How to follow a live-coding session
+
+- **Type the code, do not paste it.** You will remember a function because your
+  fingers typed it. Typos are part of the lesson: you will see the error
+  message, and learn what it means.
+- **Say when you are stuck, straight away.** A helper will come while the
+  session goes on.
+- **If you fall behind, stop typing and watch.** It is better to see the next
+  step than to be stuck on the previous one: at the break, a checkpoint object
+  gets everyone back on track (@sec-checkpoint).
+
+:::
+
+## Setup {#sec-setup}
+
+In RStudio, open a new R script (*File* > *New File* > *R Script*) and save it,
+as `workshop.R` for instance. Type the code of the session in it, and run each
+line with {{< kbd mac=Cmd-Enter win=Ctrl-Enter linux=Ctrl-Enter >}}.
+
+We load the packages as we need them. Here they are, and what they are for:
+
+| Package | Used for |
+|---|---|
+| `BiocFileCache` | downloading the data once, and re-using it afterwards |
+| `Matrix` | sparse matrices |
+| `SingleCellExperiment` | the container for single-cell data |
+| `scrapper` | QC, normalisation, feature selection, PCA, UMAP, batch correction, clustering, marker genes, pseudobulk |
+| `scater`, `ggplot2`, `patchwork` | plots |
+| `SingleR` | annotation against a reference |
+| `DESeq2` | differential expression |
+
+They are all installed in the workshop environment. To check that they are
+installed on your own computer, type `library(scrapper)`: an error means that
+the package is missing.
+
+## Reading the count matrix {#sec-read}
+
+### Downloading the data, once
+
+The count matrix of @guo2018 is a gzipped text file on GEO. `BiocFileCache`
+downloads a file the first time you ask for it, and simply returns the path to
+its local copy afterwards. In the workshop environment, the file is already in
+the cache: asking for it costs nothing. (The URL is the only line of the day
+worth copy-pasting.)
+
+```{r}
+#| label: get-path
+library(BiocFileCache)
+bfc <- BiocFileCache(ask = FALSE)
+umi_url <- "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE112nnn/GSE112013/suppl/GSE112013_Combined_UMI_table.txt.gz"
+umi_path <- bfcrpath(bfc, umi_url)
+umi_path
+```
+
+### Reading it into R
+
+The file is a table with one row per gene and one column per cell. It is big:
+reading it takes about a minute.
+
+```{r}
+#| label: read-table
+umi <- read.delim(umi_path, header = TRUE, row.names = 1)
+dim(umi)
+umi[1:5, 1:3]
+```
+
+A `data.frame` is not the right container for numbers that all have the same
+type: turn it into a matrix.
+
+```{r}
+#| label: to-matrix
+counts_dense <- as.matrix(umi)
+class(counts_dense)
+format(object.size(counts_dense), units = "MB")
+```
+
+### Making it sparse
+
+This matrix stores every single zero. A **sparse** matrix only stores the
+non-zero entries, and their positions:
+
+```{r}
+#| label: sparse
+library(Matrix)
+counts_sparse <- Matrix(counts_dense, sparse = TRUE)
+class(counts_sparse)
+format(object.size(counts_sparse), units = "MB")
+```
+
+What fraction of the entries is not zero?
+
+```{r}
+#| label: sparsity
+nnzero(counts_sparse) / length(counts_sparse)
+```
+
+Only about 1 entry in 10. We no longer need the dense copies: remove them, and
+let R give the memory back.
+
+```{r}
+#| label: cleanup
+rm(umi, counts_dense)
+invisible(gc())
+```
+
+::: {.callout-note icon='true'}
+
+## With your own 10x data
+
+Cell Ranger's `filtered_feature_bc_matrix/` folder (@sec-cellranger) is already
+sparse: `DropletUtils::read10xCounts()` reads it straight into a
+`SingleCellExperiment`, the object we build next.
+
+:::
+
+## The `SingleCellExperiment` {#sec-sce}
+
+![Anatomy of a `SingleCellExperiment`.](figures/sce.svg){#fig-sce width=100%}
+
+A matrix of counts is not enough: we will need to keep information about every
+cell (donor, quality metrics, cluster...) and every gene (is it variable?),
+plus several transformed versions of the matrix and low-dimensional
+embeddings, without ever mixing up their rows and columns.
+
+Bioconductor's answer is the `SummarizedExperiment`, the container used for
+bulk RNA-seq: one or more matrices (the *assays*) of genes × samples, a table
+describing the rows (`rowData()`), and a table describing the columns
+(`colData()`), locked together. A **`SingleCellExperiment` is a
+`SummarizedExperiment` whose columns are cells**, with a few extra slots for
+single-cell analysis, such as `reducedDims()` for embeddings (@fig-sce).
+
+```{r}
+#| label: build-sce
+library(SingleCellExperiment)
+sce <- SingleCellExperiment(assays = list(counts = counts_sparse))
+sce
+```
+
+Read that printout: it is the map of the object. Each slot has its accessor:
+
+```{r}
+#| label: sce-accessors
+dim(sce)
+assayNames(sce)
+counts(sce)[1:5, 1:3]
+head(rownames(sce))
+head(colnames(sce), 3)
+```
+
+### Cell metadata is hiding in the column names
+
+`colData(sce)` is empty for now. We have no sample sheet, but the name of each
+cell tells us where it comes from: `Donor2.AAACCTGGTGCCTTGG.1` is the cell with
+the 16-nt barcode `AAACCTGGTGCCTTGG` (@sec-gems), from replicate `1` of
+`Donor2`. Split the names on the dots, and keep each piece:
+
+```{r}
+#| label: split-names
+split_names <- strsplit(colnames(sce), "\\.")
+split_names[1:2]
+```
+
+`$` adds a column to `colData()`, exactly as it adds a column to a data frame:
+
+```{r}
+#| label: coldata
+sce$Donor <- sapply(split_names, function(x) x[1])
+sce$Barcode <- sapply(split_names, function(x) x[2])
+sce$Replicate <- sapply(split_names, function(x) x[3])
+sce$Sample <- paste(sce$Donor, sce$Replicate, sep = "_rep")
+colData(sce)
+table(sce$Donor, sce$Replicate)
+```
+
+Three donors, two 10x runs each: **six libraries**, for **three biological
+replicates**. Keep that in mind: it makes all the difference in
+@sec-pseudobulk.
+
+### Subsetting keeps everything in sync
+
+`[` subsets a `SingleCellExperiment` like a matrix, `[genes, cells]`, and
+subsets every slot accordingly:
+
+```{r}
+#| label: subset
+sce_donor1 <- sce[, sce$Donor == "Donor1"]
+dim(sce_donor1)
+table(sce_donor1$Donor)
+counts(sce[c("PRM1", "SOX9"), 1:4])
+```
+
+:::: {.callout-question}
+::: {.callout-note icon='true'}
+
+#### Question
+
+How many cells does each **sample** contribute? Which sample is the largest?
+
+:::
+::::
+
+:::: {.callout-answer}
+::: {.callout-note collapse="true"}
+
+#### Answer
+
+```{r}
+#| label: answer-sample-sizes
+table(sce$Sample)
+```
+
+:::
+::::
+
+## Quality control {#sec-qc}
+
+Not every column of the matrix is a healthy cell (@sec-count-matrix). Some
+barcodes are droplets that only caught ambient RNA, some are cells that were
+damaged or dying, some are two cells captured together. We remove the worst of
+them **first**, as they would distort every later step.
+
+Three metrics are computed for each cell:
+
+| Metric | Low-quality cells have | Because |
+|---|---|---|
+| total UMI count (`sum`) | few | little RNA was captured |
+| number of detected genes (`detected`) | few | same reason |
+| proportion of counts from mitochondrial genes | many | a damaged cell loses its cytoplasmic mRNA, while the transcripts inside the mitochondria stay behind |
+
+### Computing the metrics
+
+Mitochondrial genes are recognisable by their symbol, which starts with `MT-`:
+
+```{r}
+#| label: mito
+is_mito <- grepl("^MT-", rownames(sce))
+sum(is_mito)
+rownames(sce)[is_mito]
+```
+
+`quickRnaQc.se()` computes the three metrics, stores them in `colData()`, and
+flags outlier cells: a cell is an outlier when one of its metrics sits more
+than 3 *median absolute deviations* (MADs) away from the median, on the bad
+side (too few counts or genes, too many mitochondrial counts). Our six
+libraries were sequenced to different depths, so the thresholds are computed
+within each library, with `block =`.
+
+```{r}
+#| label: qc
+library(scrapper)
+sce <- quickRnaQc.se(
+    sce,
+    subsets = list(Mito = is_mito),
+    block = sce$Sample
+)
+colData(sce)
+```
+
+The thresholds used for each library are stored in `metadata()`:
+
+```{r}
+#| label: qc-thresholds
+metadata(sce)$qc$thresholds
+```
+
+and `keep` says which cells pass:
+
+```{r}
+#| label: qc-keep
+table(sce$Sample, sce$keep)
+```
+
+### Look before you filter
+
+Always plot what you are about to throw away:
+
+```{r}
+#| label: qc-plots
+#| fig-height: 7
+library(scater)
+library(ggplot2)
+library(patchwork)
+p_sum <- plotColData(sce, x = "Sample", y = "sum", colour_by = "keep") +
+    scale_y_log10()
+p_mito <- plotColData(
+    sce, x = "Sample", y = "subset.proportion.Mito", colour_by = "keep"
+)
+p_sum / p_mito
+```
+
+`/` stacks two plots with `patchwork`. Notice the ceilings: no cell has more
+than 20% of mitochondrial counts, nor fewer than about
+`r format(signif(min(sce$sum), 2), big.mark = ",")` UMIs. The authors filtered
+the table before depositing it, which is common: always check what was done to
+the data you download.
+
+:::: {.callout-question}
+::: {.callout-note icon='true'}
+
+#### Question
+
+Not a single cell of `Donor1` is discarded. Why? Is it good news?
+
+:::
+::::
+
+:::: {.callout-answer}
+::: {.callout-note collapse="true"}
+
+#### Answer
+
+Look at the thresholds on the mitochondrial proportion, in %:
+
+```{r}
+#| label: answer-mito-thresholds
+round(100 * metadata(sce)$qc$thresholds$subset.proportion$Mito)
+```
+
+The cells of `Donor1` have more mitochondrial counts overall: the median and
+the MAD of its libraries are higher, and so is their threshold, above the 20%
+ceiling of the table. None of its cells is far enough from its own median to
+be flagged.
+
+Thresholds computed within each library are **relative**: they assume that
+most cells of each library are fine, and adapt to each of them. A cell with
+15% of mitochondrial counts is thus discarded from `Donor2` and `Donor3`, but
+kept in `Donor1`. A fixed threshold, say `sce$subset.proportion.Mito < 0.1`,
+would treat all libraries the same. Neither choice is right in general: make
+it knowingly, and look at the plots.
+
+:::
+::::
+
+Let's filter:
+
+```{r}
+#| label: qc-filter
+sce <- sce[, sce$keep]
+dim(sce)
+```
+
+We keep `r format(ncol(sce), big.mark = ",")` cells.
+
+::: {.callout-note icon='true'}
+
+## Going further: doublets and ambient RNA
+
+Two more filters are often applied, which we skip today for lack of time:
+**doublets** can be found with `scDblFinder` [@germain2021], and the
+contamination by **ambient RNA** can be estimated and removed with `decontX`
+or `SoupX`.
+
+:::
+
+## Normalisation {#sec-norm}
+
+Two cells can have different total counts for biological reasons (one is
+bigger, or more active) or technical ones (one was captured, reverse-transcribed
+or sequenced more efficiently). Normalisation removes the technical part, so
+that expression values can be compared between cells.
+
+The simplest approach divides the counts of each cell by a **size factor**
+proportional to its library size, its total UMI count. The normalised values
+are then log-transformed: a pseudo-count of 1 avoids taking the log of zero,
+and the log turns fold changes into differences, so that a few very highly
+expressed genes do not dominate everything else.
+
+```{r}
+#| label: normalise
+sce <- normalizeRnaCounts.se(
+    sce,
+    size.factors = sce$sum,
+    block = sce$Sample
+)
+summary(sce$sizeFactor)
+assayNames(sce)
+```
+
+With `block = sce$Sample`, the size factors also account for the six libraries
+having been sequenced to different depths. `logcounts` holds
+$\log_2(\text{count} / \text{size factor} + 1)$:
+
+```{r}
+#| label: logcounts
+logcounts(sce)[c("PRM1", "SOX9", "ACTA2"), 1:3]
+```
+
+From now on, everything about **expression** uses `logcounts`; everything
+about **counts**, such as differential expression (@sec-pseudobulk), goes back
+to `counts`.
+
+::: {.callout-note icon='true'}
+
+## Going further: composition bias
+
+When cell types express very different sets of genes, library size factors are
+slightly biased: this is *composition bias*. It rarely changes the clusters,
+but `scran`'s deconvolution method corrects it [@lun2016]: compute the size
+factors with `scuttle::pooledSizeFactors(sce, clusters = scran::quickCluster(sce))`,
+and pass them to `normalizeRnaCounts.se(size.factors = ...)`.
+
+:::
+
+## Feature selection {#sec-hvg}
+
+Of the `r format(nrow(sce), big.mark = ",")` genes, most are not expressed at
+all, or expressed at similar levels in every cell. They carry no information
+about which cell is which, but add noise to every comparison between cells. We
+keep the **highly variable genes** (HVGs): those whose variance across cells is
+much larger than expected for a gene of the same average expression.
+
+```{r}
+#| label: hvg
+sce <- chooseRnaHvgs.se(sce, block = sce$Sample, top = 2000)
+rowData(sce)
+sum(rowData(sce)$hvg)
+```
+
+`rowData()` now holds, for each gene, its mean and variance of expression, the
+variance expected from the trend fitted to all genes (`fitted`), the excess
+over that trend (`residuals`), and whether it is one of the 2,000 HVGs:
+
+```{r}
+#| label: hvg-plot
+gene_stats <- as.data.frame(rowData(sce))
+ggplot(gene_stats, aes(x = means, y = variances, colour = hvg)) +
+    geom_point(size = 0.5) +
+    geom_line(aes(y = fitted), colour = "dodgerblue", linewidth = 1) +
+    scale_colour_manual(values = c(`FALSE` = "grey70", `TRUE` = "firebrick")) +
+    labs(x = "Mean of log-expression", y = "Variance of log-expression") +
+    theme_bw()
+```
+
+The genes furthest above the trend:
+
+```{r}
+#| label: hvg-top
+top_hvgs <- rownames(gene_stats)[order(gene_stats$residuals, decreasing = TRUE)]
+head(top_hvgs, 20)
+```
+
+**Recognise anything?** `TNP1`, `PRM1` and `PRM2` (transition protein and
+protamines), `HMGB4` and `LELP1` are expressed late in spermatogenesis, while
+`PTGDS`, `IGFBP7` or `DCN` come from somatic cells: feature selection has found
+the main axes of variation of a testis without being told anything about
+testes.
+
+## Dimensionality reduction {#sec-dimred}
+
+### PCA
+
+2,000 genes are still 2,000 dimensions. A principal component analysis (PCA)
+compresses them into a few dozen components that capture most of the
+structure. Since biology is concentrated in the first components while noise
+is spread evenly across all of them, PCA also *denoises* the data.
+
+```{r}
+#| label: pca
+sce <- runPca.se(sce, features = rowData(sce)$hvg, number = 25)
+reducedDimNames(sce)
+dim(reducedDim(sce, "PCA"))
+```
+
+How much of the variance does each component explain?
+
+```{r}
+#| label: pca-variance
+pca_info <- metadata(sce)$PCA
+percent_var <- 100 * pca_info$variance.explained / pca_info$total.variance
+pca_df <- data.frame(PC = seq_along(percent_var), percent = percent_var)
+ggplot(pca_df, aes(x = PC, y = percent)) +
+    geom_col() +
+    labs(x = "Principal component", y = "Variance explained (%)") +
+    theme_bw()
+```
+
+The first components carry most of the signal, and we keep 25, `scrapper`'s
+default: anything between 10 and 50 would give a similar picture here.
+
+```{r}
+#| label: pca-plot
+plotReducedDim(sce, "PCA", colour_by = "Donor")
+```
+
+### UMAP
+
+The first two PCs only show part of the structure. UMAP [@mcinnes2018] squeezes
+all 25 PCs into two dimensions that we can look at:
+
+```{r}
+#| label: umap
+sce <- runUmap.se(sce)
+plotReducedDim(sce, "UMAP", colour_by = "Donor")
+```
+
+::: {.callout-important icon='true'}
+
+## A UMAP is a picture, not a measurement
+
+UMAP keeps cells that are close in the PCA space close in the picture, but
+distances between distant groups, and the size of a group, mean little. Use it
+to look at the data, and run the analysis itself on the PCs.
+
+:::
+
+## Batch effects {#sec-batch}
+
+**Do the donors overlap, or does each of them form its own island?** That is
+the first thing to look at, every time. Here, several populations split by
+donor. Part of that is biology (donors are different people) and part is
+technical: their samples were collected and processed separately. If we
+cluster now, some clusters will be donors rather than cell types.
+
+The mutual nearest neighbours (MNN) method [@haghverdi2018] pairs cells across
+donors that are each other's closest match: such pairs are assumed to be the
+same cell type, and the differences between them measure the batch effect,
+which is then removed from all cells. `correctMnn.se()` stores the corrected
+PCs as a new reduced dimension, `MNN`:
+
+```{r}
+#| label: mnn
+sce <- correctMnn.se(sce, block = sce$Donor)
+reducedDimNames(sce)
+sce <- runUmap.se(sce, reddim.type = "MNN", output.name = "UMAP_MNN")
+plotReducedDim(sce, "UMAP_MNN", colour_by = "Donor")
+```
+
+### Is any of this real?
+
+Before trusting a picture, check it against something you know (@fig-testis):
+`UTF1` marks spermatogonial stem cells, `SYCP3` meiotic spermatocytes, `PRM2`
+spermatids, and `ACTA2` the peritubular myoid cells, a somatic population.
+
+```{r}
+#| label: umap-markers
+#| fig-height: 6
+#| fig-width: 8
+plotReducedDim(sce, "UMAP_MNN", colour_by = "UTF1") +
+    plotReducedDim(sce, "UMAP_MNN", colour_by = "SYCP3") +
+    plotReducedDim(sce, "UMAP_MNN", colour_by = "PRM2") +
+    plotReducedDim(sce, "UMAP_MNN", colour_by = "ACTA2")
+```
+
+The germ cells line up along one continuous path, from stem cells to
+spermatids: the **trajectory** of spermatogenesis. The somatic cells form
+separate islands.
+
+::: {.callout-important icon='true'}
+
+## Corrected values are for maps and clusters only
+
+Batch correction changes the data to make donors look alike. Use the corrected
+space to visualise and cluster the cells, never to test for differential
+expression: for that, we go back to the raw counts and model the donor
+explicitly (@sec-pseudobulk).
+
+:::
+
+## ☕ Break, and checkpoint {#sec-checkpoint}
+
+Look at everything the object now holds:
+
+```{r}
+#| label: checkpoint-sce
+sce
+```
+
+Two assays, quality metrics and size factors in `colData()`, gene statistics in
+`rowData()`, and four reduced dimensions: one hour of work in a single
+variable.
+
+::: {.callout-tip icon='true'}
+
+## Fallen behind? Start again from here
+
+The workshop package holds a copy of `sce` as it is at this point, without
+the `logcounts` to keep it small. Restart R (*Session* > *Restart R*), then
+load it and compute the `logcounts` again, as in @sec-norm:
+
+```{r}
+#| label: checkpoint-load
+#| eval: false
+library(SingleCellExperiment)
+library(scrapper)
+library(scater)
+library(ggplot2)
+library(patchwork)
+sce <- GenE2scRNAseqIntro::sce_checkpoint
+sce <- normalizeRnaCounts.se(sce, size.factors = sce$sum, block = sce$Sample)
+```
+
+:::
+
+## Clustering {#sec-clustering}
+
+In bulk RNA-seq, you **know** your groups: treated and untreated, tumour and
+normal. In single-cell RNA-seq, the groups are what you are looking for.
+
+The standard approach is **graph-based clustering**:
+
+1. connect each cell to its nearest neighbours in the (corrected) PCA space;
+2. weight each connection by the number of neighbours the two cells share;
+3. cut the graph into communities of densely connected cells, with a
+   community-detection algorithm (Louvain, Leiden...).
+
+It scales to millions of cells and makes no assumption about the shape of the
+clusters.
+
+```{r}
+#| label: cluster
+sce <- clusterGraph.se(sce, reddim.type = "MNN")
+table(sce$clusters)
+plotReducedDim(sce, "UMAP_MNN", colour_by = "clusters", text_by = "clusters")
+```
+
+### The number of neighbours is a resolution dial
+
+With few neighbours, the graph is sparse and splits into many small
+communities; with many neighbours, it forms fewer, larger ones:
+
+```{r}
+#| label: cluster-resolution
+neighbours <- c(5, 10, 20, 50)
+n_clusters <- sapply(neighbours, function(k) {
+    sce_k <- clusterGraph.se(sce, reddim.type = "MNN", num.neighbors = k)
+    length(unique(sce_k$clusters))
+})
+data.frame(neighbours, n_clusters)
+```
+
+There is no *correct* number of clusters, only the resolution at which the
+biology you care about becomes visible. Clustering is a tool to generate
+hypotheses, not a measurement: if two clusters have the same markers, merge
+them; if a cluster obviously contains two cell types, split it.
+
+### Are the clusters shared between donors?
+
+```{r}
+#| label: cluster-composition
+composition <- table(cluster = sce$clusters, donor = sce$Donor)
+composition
+ggplot(as.data.frame(composition), aes(x = cluster, y = Freq, fill = donor)) +
+    geom_col(position = "fill") +
+    labs(x = "Cluster", y = "Proportion of cells") +
+    theme_bw()
+```
+
+Most clusters gather cells from the three donors, but a few are dominated by
+`Donor1`. A batch effect left over, or populations that are more abundant in
+that donor? A cluster made of a single donor is suspect; one where the other
+donors are present, but rarer, is more likely a difference in composition.
+The markers will tell (@sec-markers).
+
+## Marker genes {#sec-markers}
+
+Clusters are numbers; biology needs names. Two complementary approaches:
+check genes we already know, and ask the data which genes distinguish each
+cluster.
+
+### Known markers
+
+@fig-testis lists genes that mark each cell type of the testis:
+
+```{r}
+#| label: panels
+panels <- list(
+    SSC            = c("UTF1", "ID4", "PIWIL4"),
+    Spermatogonia  = c("DMRT1", "KIT", "MKI67"),
+    Spermatocyte   = c("SYCP3", "DMC1", "SPO11"),
+    RoundSpermatid = c("SUN5", "ACR", "BRDT"),
+    ElongSpermatid = c("TNP1", "PRM1", "PRM2"),
+    Sertoli        = c("SOX9", "AMH"),
+    Leydig         = c("DLK1", "INHBA", "CYP17A1"),
+    Myoid          = c("MYH11", "ACTA2"),
+    Endothelial    = c("VWF", "PECAM1"),
+    Macrophage     = c("CD14", "TYROBP")
+)
+```
+
+```{r}
+#| label: dotplot
+#| fig-height: 6
+#| fig-width: 9
+plotDots(sce, features = unlist(panels), group = "clusters") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+The size of a dot is the fraction of the cells of a cluster in which the gene
+is detected; its colour, the average expression in the cluster. Read along each
+cluster, and the names start writing themselves.
+
+### Markers found by the data
+
+`scoreMarkers.se()` compares each cluster with every other one, gene by gene,
+and summarises the comparisons with **effect sizes**: Cohen's *d* (the
+difference in mean expression, in units of standard deviation), the AUC (the
+probability that a cell of the cluster expresses the gene more than a cell of
+the other cluster), or the difference in the proportion of cells expressing it.
+Blocking on the donor makes the comparisons within each donor.
+
+```{r}
+#| label: score-markers
+markers <- scoreMarkers.se(sce, groups = sce$clusters, block = sce$Donor)
+names(markers)
+```
+
+One table per cluster, with genes sorted by their average Cohen's *d* against
+the other clusters. `previewMarkers()` shows the essential columns: the mean
+expression in the cluster, the proportion of its cells expressing the gene, and
+the average log-fold change with the other clusters.
+
+```{r}
+#| label: preview-markers
+previewMarkers(markers[["1"]])
+```
+
+Plot the best marker of cluster 1 on the map:
+
+```{r}
+#| label: top-marker-umap
+top_gene <- rownames(markers[["1"]])[1]
+plotReducedDim(sce, "UMAP_MNN", colour_by = top_gene, text_by = "clusters")
+```
+
+:::: {.callout-question}
+::: {.callout-note icon='true'}
+
+#### Question
+
+Pick a cluster that looks somatic on the dot plot, and look at its top
+markers. Do they agree with @fig-testis?
+
+Why do we look at effect sizes, and not at p-values, to rank marker genes?
+
+:::
+::::
+
+:::: {.callout-answer}
+::: {.callout-note collapse="true"}
+
+#### Answer
+
+Replace `"1"` with the cluster of your choice, e.g. `previewMarkers(markers[["7"]])`.
+
+The clusters were defined from these very expression values, precisely to
+separate cells that differ. Testing whether they differ would be circular: the
+p-values would all be tiny, and mean nothing. Effect sizes still rank genes by
+how well they separate the clusters, which is all we need here.
+
+:::
+::::
+
+## Annotation with a reference {#sec-annotation}
+
+Annotating by hand does not scale, and only finds what you thought of looking
+for. The alternative is to compare the cells with a **reference**: a dataset
+whose cell types are already known.
+
+`SingleR` [@aran2019] correlates each cell, or here each cluster, with the
+profile of each cell type of the reference, using only genes that distinguish
+the reference cell types, and keeps the best match. The workshop package
+provides a reference built from the single-cell type atlas of the Human
+Protein Atlas [@karlsson2021]: the average expression of each gene in
+154 cell types from many tissues, the testis included.
+
+```{r}
+#| label: reference
+HPA_ref <- GenE2scRNAseqIntro::HPA_ref
+HPA_ref
+head(sort(unique(HPA_ref$label)), 20)
+```
+
+With `clusters =`, `SingleR` first pools the cells of each cluster, and
+labels the cluster as a whole: a pooled profile is much less noisy than a
+single cell.
+
+```{r}
+#| label: singler
+library(SingleR)
+pred <- SingleR(
+    test = sce,
+    ref = HPA_ref,
+    labels = HPA_ref$label,
+    clusters = sce$clusters
+)
+pred[, c("labels", "pruned.labels")]
+```
+
+`pred` has one row per cluster. To give each **cell** the label of its
+cluster, use a named vector as a lookup table:
+
+```{r}
+#| label: celltype
+label_of_cluster <- setNames(pred$labels, rownames(pred))
+sce$celltype <- label_of_cluster[as.character(sce$clusters)]
+table(sce$celltype)
+```
+
+```{r}
+#| label: umap-celltype
+#| fig-width: 9
+plotReducedDim(
+    sce, "UMAP_MNN",
+    colour_by = "celltype", text_by = "celltype", text_size = 3.5
+)
+```
+
+Two things to observe on this map:
+
+- The germ-cell labels line up along the differentiation path, in
+  developmental order. Spermatogenesis is a **trajectory**, and clustering has
+  cut it into segments whose boundaries depend on the resolution: do not
+  over-interpret them.
+- The somatic labels mark discrete populations: their boundaries are real.
+
+:::: {.callout-question}
+::: {.callout-note icon='true'}
+
+#### Question
+
+In @sec-clustering, a few clusters were dominated by `Donor1`. Which cell types
+are they?
+
+:::
+::::
+
+:::: {.callout-answer}
+::: {.callout-note collapse="true"}
+
+#### Answer
+
+```{r}
+#| label: answer-celltype-donor
+table(sce$celltype, sce$Donor)
+```
+
+`Donor1` contributes most of the spermatogonia and of the early spermatocytes.
+The cells of the other donors are present in the same clusters, just rarer:
+these samples differ in composition, which is biology (or sampling), not a
+batch effect.
+
+:::
+::::
+
+::: {.callout-warning icon='true'}
+
+## A reference only knows what it contains
+
+`SingleR` always returns the closest label, even when the right one is not in
+the reference: check the labels against the markers. `pruned.labels` is `NA`
+for the clusters whose best label barely beats the second best, which deserve
+a second look.
+
+:::
+
+## Pseudobulk differential expression {#sec-pseudobulk}
+
+### The unit of replication is the donor
+
+We could compare two groups of **cells** directly, with thousands of cells per
+group. But cells from the same donor are not independent observations: they
+share a genome, a history and a sample preparation. Three donors are three
+biological replicates, whether they gave 600 cells or 600,000. Tests that treat
+each cell as a replicate give wildly over-confident p-values [@squair2021].
+
+The standard solution is the **pseudobulk**: sum the counts of all the cells of
+one cell type within one donor. This gives back a small, bulk-like matrix, with
+one column per cell type and donor, which bulk RNA-seq tools such as `DESeq2`
+[@love2014] analyse well. The two 10x runs of each donor are technical
+replicates: they are summed too.
+
+```{r}
+#| label: pseudobulk
+pb <- aggregateAcrossCells.se(
+    sce,
+    factors = colData(sce)[, c("celltype", "Donor")]
+)
+pb
+head(colData(pb)[, c("factor.celltype", "factor.Donor", "counts")])
+```
+
+Each column of `pb` is one cell type in one donor; the `counts` column of
+`colData(pb)` says how many cells were summed. Let's compare the two earliest
+germ-cell populations: the spermatogonial stem cells (*undifferentiated
+spermatogonia*) and the spermatogonia that have started to differentiate.
+
+```{r}
+#| label: pseudobulk-subset
+spermatogonia <- c(
+    "undifferentiated spermatogonia",
+    "differentiating spermatogonia"
+)
+pb_sg <- pb[, pb$factor.celltype %in% spermatogonia]
+samples <- data.frame(
+    celltype = factor(pb_sg$factor.celltype, levels = spermatogonia),
+    donor = pb_sg$factor.Donor,
+    ncells = pb_sg$counts
+)
+samples
+```
+
+### Testing with `DESeq2`
+
+::: {.callout-note icon='true'}
+
+## `DESeq2` in a nutshell
+
+`DESeq2` models the **raw counts** of each gene with a negative binomial
+distribution, corrects for differences in library size with its own size
+factors, and shares information across genes to estimate how variable each
+gene is between replicates. The **design formula** describes the experiment:
+`~ donor + celltype` compares the two cell types *within* each donor, which is
+a paired design, and removes the differences between donors.
+
+:::
+
+```{r}
+#| label: deseq
+library(DESeq2)
+dds <- DESeqDataSetFromMatrix(
+    countData = assay(pb_sg, "sums"),
+    colData = samples,
+    design = ~ donor + celltype
+)
+dds <- dds[rowSums(counts(dds) >= 10) >= 3, ]
+dds <- DESeq(dds)
+res <- results(
+    dds,
+    contrast = c(
+        "celltype",
+        "differentiating spermatogonia",   # numerator
+        "undifferentiated spermatogonia"   # denominator
+    )
+)
+summary(res)
+```
+
+The first line keeps the genes with at least 10 counts in at least 3 of the 6
+pseudo-samples. A positive log-fold change means a higher expression in the
+differentiating spermatogonia. The most significant genes:
+
+```{r}
+#| label: deseq-top
+res_df <- as.data.frame(res)
+res_df <- res_df[order(res_df$padj), ]
+head(res_df[, c("baseMean", "log2FoldChange", "padj")], 10)
+```
+
+Without being told anything, the test recovers the biology of the testis: the
+stem-cell markers of @fig-testis are higher in the undifferentiated cells, and
+genes of meiosis such as `SYCP3` are switched on in the differentiating ones.
+
+```{r}
+#| label: deseq-known
+res_df[c("UTF1", "ID4", "PIWIL4", "SYCP3", "MKI67"), c("log2FoldChange", "padj")]
+```
+
+```{r}
+#| label: volcano
+res_df <- res_df[!is.na(res_df$padj), ]
+ggplot(res_df, aes(x = log2FoldChange, y = -log10(padj), colour = padj < 0.05)) +
+    geom_point(size = 0.8) +
+    scale_colour_manual(values = c(`FALSE` = "grey70", `TRUE` = "firebrick")) +
+    labs(
+        x = "log2 fold change, differentiating / undifferentiated",
+        y = "-log10(adjusted p-value)"
+    ) +
+    theme_bw()
+```
+
+::: {.callout-warning icon='true'}
+
+## What this test can, and cannot, tell you
+
+Our two groups were defined from the expression data, by clustering: they were
+chosen to be different, so the p-values above are optimistic. Here, `DESeq2`
+mostly helps rank genes.
+
+Pseudobulk analyses shine when the groups are defined independently of the
+expression data: comparing **conditions** (healthy *vs* infertile donors,
+treated *vs* untreated...) **within one cell type**, with several donors per
+condition. The code is exactly the same, with `~ condition` in the design.
+
+:::
+
+## Wrap-up {#sec-wrap-up}
+
+### What we did
+
+```{r}
+#| label: recap
+#| eval: false
+# read the counts, and build the object
+umi <- read.delim(umi_path, header = TRUE, row.names = 1)
+counts_sparse <- Matrix(as.matrix(umi), sparse = TRUE)
+sce <- SingleCellExperiment(assays = list(counts = counts_sparse))
+split_names <- strsplit(colnames(sce), "\\.")
+sce$Donor <- sapply(split_names, function(x) x[1])
+sce$Replicate <- sapply(split_names, function(x) x[3])
+sce$Sample <- paste(sce$Donor, sce$Replicate, sep = "_rep")
+# quality control
+is_mito <- grepl("^MT-", rownames(sce))
+sce <- quickRnaQc.se(sce, subsets = list(Mito = is_mito), block = sce$Sample)
+sce <- sce[, sce$keep]
+# normalisation, feature selection, PCA
+sce <- normalizeRnaCounts.se(sce, size.factors = sce$sum, block = sce$Sample)
+sce <- chooseRnaHvgs.se(sce, block = sce$Sample, top = 2000)
+sce <- runPca.se(sce, features = rowData(sce)$hvg, number = 25)
+# batch correction, UMAP
+sce <- correctMnn.se(sce, block = sce$Donor)
+sce <- runUmap.se(sce, reddim.type = "MNN", output.name = "UMAP_MNN")
+# clusters, markers, cell types
+sce <- clusterGraph.se(sce, reddim.type = "MNN")
+markers <- scoreMarkers.se(sce, groups = sce$clusters, block = sce$Donor)
+pred <- SingleR(sce, ref = HPA_ref, labels = HPA_ref$label, clusters = sce$clusters)
+sce$celltype <- setNames(pred$labels, rownames(pred))[as.character(sce$clusters)]
+# pseudobulk
+pb <- aggregateAcrossCells.se(sce, factors = colData(sce)[, c("celltype", "Donor")])
+```
+
+About twenty lines of code. Everything else was looking at the results and
+deciding whether to believe them, which is the actual job.
+
+### Where to go next
+
+- The [`scrapbook`](https://bioconductor.org/books/release/scrapbook/) and
+  [OSCA](https://bioconductor.org/books/release/OSCA/) books [@amezquita2020]
+  explain each of these steps, and their alternatives, in depth.
+- Spermatogenesis is a trajectory: *pseudotime* methods such as `TSCAN` or
+  `slingshot` order the cells along it.
+- For spatial transcriptomics, the
+  [OSTA](https://bioconductor.org/books/release/OSTA/) book applies the same
+  containers and many of the same steps to Visium and other technologies.
+
+### Exercises
+
+**1. Batch effects.** Cluster the cells on the **uncorrected** PCs, and redo
+the composition plot of @sec-clustering. What changed?
+
+:::: {.callout-answer}
+::: {.callout-note collapse="true"}
+
+#### Answer
+
+```{r}
+#| label: exercise-1
+#| eval: false
+sce$clusters_uncorrected <- clusterGraph.se(sce, reddim.type = "PCA")$clusters
+composition <- table(cluster = sce$clusters_uncorrected, donor = sce$Donor)
+ggplot(as.data.frame(composition), aes(x = cluster, y = Freq, fill = donor)) +
+    geom_col(position = "fill")
+```
+
+Several clusters now contain cells of a single donor: without correction, part
+of the clustering separates donors rather than cell types.
+
+:::
+::::
+
+**2. Feature selection.** Redo the analysis with the top 500, then the top
+5,000 HVGs, and compare the UMAPs. How sensitive is the picture to that choice?
+
+:::: {.callout-answer}
+::: {.callout-note collapse="true"}
+
+#### Answer
+
+```{r}
+#| label: exercise-2
+#| eval: false
+sce_500 <- chooseRnaHvgs.se(sce, block = sce$Sample, top = 500)
+sce_500 <- runPca.se(sce_500, features = rowData(sce_500)$hvg, number = 25)
+sce_500 <- correctMnn.se(sce_500, block = sce_500$Donor)
+sce_500 <- runUmap.se(sce_500, reddim.type = "MNN", output.name = "UMAP_MNN")
+plotReducedDim(sce_500, "UMAP_MNN", colour_by = "celltype")
+```
+
+Then the same with `top = 5000`. The overall structure is robust; the fine
+details of the map are not.
+
+:::
+::::
+
+**3. Another reference.** Annotate the clusters with the *Human Primary Cell
+Atlas*, a reference of purified cell types from the `celldex` package (it is
+already downloaded in the workshop environment). Which populations does it
+recognise, and what does it call the germ cells?
+
+:::: {.callout-answer}
+::: {.callout-note collapse="true"}
+
+#### Answer
+
+```{r}
+#| label: exercise-3
+#| eval: false
+hpca <- celldex::HumanPrimaryCellAtlasData()
+pred_hpca <- SingleR(
+    test = sce, ref = hpca, labels = hpca$label.main, clusters = sce$clusters
+)
+data.frame(cluster = rownames(pred), HPA = pred$labels, HPCA = pred_hpca$labels)
+```
+
+The Human Primary Cell Atlas contains no germ cells: `SingleR` still gives them
+the closest label it has. A reference can only recognise what it contains.
+
+:::
+::::
+
+**4. Somatic cells.** Compare the Leydig cells with the peritubular myoid
+cells, with a pseudobulk analysis. Which genes come up?
+
+:::: {.callout-answer}
+::: {.callout-note collapse="true"}
+
+#### Answer
+
+```{r}
+#| label: exercise-4
+#| eval: false
+somatic <- c("leydig cells", "peritubular myoid cells")
+pb_soma <- pb[, pb$factor.celltype %in% somatic]
+samples_soma <- data.frame(
+    celltype = factor(pb_soma$factor.celltype, levels = somatic),
+    donor = pb_soma$factor.Donor
+)
+dds_soma <- DESeqDataSetFromMatrix(
+    countData = assay(pb_soma, "sums"),
+    colData = samples_soma,
+    design = ~ donor + celltype
+)
+dds_soma <- dds_soma[rowSums(counts(dds_soma) >= 10) >= 3, ]
+dds_soma <- DESeq(dds_soma)
+res_soma <- as.data.frame(results(dds_soma))
+head(res_soma[order(res_soma$padj), ], 10)
+```
+
+:::
+::::
+
+## Session info {.unnumbered}
+
+::: {.callout-note collapse="true"}
+
+## Click to expand 👇
+
+```{r}
+#| label: session-info
+sessionInfo()
+```
+
+:::

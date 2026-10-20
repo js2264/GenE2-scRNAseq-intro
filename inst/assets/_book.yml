@@ -1,10 +1,14 @@
 book:
-  title: "GenE2scRNAseqIntro"
+  title: "Introduction to single-cell RNA-seq analysis"
+  subtitle: "GenE2 Master 2 · Single-Cell Omics and Spatial Transcriptomics"
+  author: "Jacques Serizay"
   chapters:
     - index.qmd
+    - pages/from-cells-to-counts.qmd
+    - pages/workshop.qmd
   cover-image: assets/cover.png
   favicon: assets/favicon.png
-  sidebar: 
+  sidebar:
     tools:
       - icon: git
         menu:

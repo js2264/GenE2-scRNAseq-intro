@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" width="900" height="360" role="img" aria-label="The standard Bioconductor single-cell workflow, in two parts separated by a break">
+  <rect x="0" y="0" width="900" height="360" fill="#ffffff"/>
+  <g font-family="Helvetica, Arial, sans-serif" fill="#16202b">
+
+    <!-- Part 1 lane -->
+    <rect x="16" y="16" width="868" height="140" rx="10" fill="#f2f7fc" stroke="#c6dcf0" stroke-width="1.5"/>
+    <text x="32" y="42" font-size="15" font-weight="bold" fill="#1f5fa0">PART 1 &#183; from a count matrix to a map of the cells</text>
+
+    <g stroke="#2c6fb3" stroke-width="1.8" fill="#ffffff">
+      <rect x="32" y="58" width="106" height="72" rx="8"/>
+      <rect x="153" y="58" width="106" height="72" rx="8"/>
+      <rect x="274" y="58" width="106" height="72" rx="8"/>
+      <rect x="395" y="58" width="106" height="72" rx="8"/>
+      <rect x="516" y="58" width="106" height="72" rx="8"/>
+      <rect x="637" y="58" width="106" height="72" rx="8"/>
+      <rect x="758" y="58" width="110" height="72" rx="8"/>
+    </g>
+    <g font-size="13" text-anchor="middle">
+      <text x="85"  y="88">Count matrix</text><text x="85"  y="106" font-size="11" fill="#5b6b7c">read the file</text>
+      <text x="206" y="88">SingleCell-</text><text x="206" y="105">Experiment</text>
+      <text x="327" y="88">Quality</text><text x="327" y="105">control</text>
+      <text x="448" y="88">Normalis-</text><text x="448" y="105">ation</text>
+      <text x="569" y="88">Feature</text><text x="569" y="105">selection</text>
+      <text x="690" y="88">PCA,</text><text x="690" y="105">UMAP</text>
+      <text x="813" y="88">Batch</text><text x="813" y="105">correction</text>
+    </g>
+    <g stroke="#2c6fb3" stroke-width="1.8" fill="none">
+      <path d="M138 94 L149 94"/><path d="M259 94 L270 94"/><path d="M380 94 L391 94"/>
+      <path d="M501 94 L512 94"/><path d="M622 94 L633 94"/><path d="M743 94 L754 94"/>
+    </g>
+    <g fill="#2c6fb3">
+      <polygon points="152,94 145,90 145,98"/><polygon points="273,94 266,90 266,98"/>
+      <polygon points="394,94 387,90 387,98"/><polygon points="515,94 508,90 508,98"/>
+      <polygon points="636,94 629,90 629,98"/><polygon points="757,94 750,90 750,98"/>
+    </g>
+
+    <!-- connector between lanes: the break -->
+    <path d="M813 130 L813 148 L95 148 L95 170" stroke="#9bb3c7" stroke-width="1.8" fill="none" stroke-dasharray="5 4"/>
+    <polygon points="95,178 90,168 100,168" fill="#9bb3c7"/>
+    <text x="470" y="166" font-size="11" text-anchor="middle" fill="#5b6b7c">&#9749; 10-minute break &#183; fallen behind? load the checkpoint object and carry on</text>
+
+    <!-- Part 2 lane -->
+    <rect x="16" y="188" width="868" height="140" rx="10" fill="#f0f8f5" stroke="#bfe0d6" stroke-width="1.5"/>
+    <text x="32" y="214" font-size="15" font-weight="bold" fill="#146b56">PART 2 &#183; from a map of the cells to cell types</text>
+
+    <g stroke="#1f8a70" stroke-width="1.8" fill="#ffffff">
+      <rect x="32" y="230" width="196" height="72" rx="8"/>
+      <rect x="246" y="230" width="196" height="72" rx="8"/>
+      <rect x="460" y="230" width="196" height="72" rx="8"/>
+      <rect x="674" y="230" width="194" height="72" rx="8"/>
+    </g>
+    <g font-size="13" text-anchor="middle">
+      <text x="130" y="260">Clustering</text><text x="130" y="278" font-size="11" fill="#5b6b7c">graph-based, on corrected PCs</text>
+      <text x="344" y="260">Marker genes</text><text x="344" y="278" font-size="11" fill="#5b6b7c">known panels + de novo</text>
+      <text x="558" y="260">Annotation</text><text x="558" y="278" font-size="11" fill="#5b6b7c">SingleR + a public reference</text>
+      <text x="771" y="260">Differential expression</text><text x="771" y="278" font-size="11" fill="#5b6b7c">pseudobulk + DESeq2</text>
+    </g>
+    <g stroke="#1f8a70" stroke-width="1.8" fill="none">
+      <path d="M228 266 L242 266"/><path d="M442 266 L456 266"/><path d="M656 266 L670 266"/>
+    </g>
+    <g fill="#1f8a70">
+      <polygon points="242,266 235,262 235,270"/><polygon points="456,266 449,262 449,270"/>
+      <polygon points="670,266 663,262 663,270"/>
+    </g>
+
+    <text x="450" y="348" font-size="11" text-anchor="middle" fill="#7a8896">Every step is a function call on one object: the SingleCellExperiment grows as you go.</text>
+  </g>
+</svg>

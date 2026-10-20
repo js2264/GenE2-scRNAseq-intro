@@ -1,11 +1,13 @@
 website:
   back-to-top-navigation: true
-  search: 
+  search:
     location: sidebar
   page-footer:
     background: light
     left: |
       This book was built with <a href="https://github.com/js2264/BiocBook/">BiocBook</a> with :heart:
+  repo-url: https://github.com/js2264/GenE2-scRNAseq-intro
+  repo-subdir: inst
   repo-branch: devel
   repo-actions: [edit, issue]
   open-graph: true
