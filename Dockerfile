@@ -58,3 +58,10 @@ RUN mkdir -p /home/rstudio/workshop && \
     cp /opt/pkg/inst/pages/workshop.qmd /home/rstudio/workshop/ && \
     cp -r /opt/pkg/inst/pages/figures /home/rstudio/workshop/ && \
     chown -R rstudio:rstudio /home/rstudio/workshop
+
+## Orchestra keeps each participant's work in /data, and resets the rest of the
+## container at every session: a start-up script makes /data writable by the
+## RStudio user, and ~/data points to it, in RStudio's Files pane
+RUN install -m 755 /opt/pkg/docker/cont-init.d/10_workshop_data /etc/cont-init.d/10_workshop_data && \
+    ln -sfn /data /home/rstudio/data && \
+    chown -h rstudio:rstudio /home/rstudio/data
