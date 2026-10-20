@@ -930,7 +930,7 @@ spermatogonia <- c(
 pb_sg <- pb[, pb$factor.celltype %in% spermatogonia]
 samples <- data.frame(
     celltype = factor(pb_sg$factor.celltype, levels = spermatogonia),
-    donor = pb_sg$factor.Donor,
+    donor = factor(pb_sg$factor.Donor),
     ncells = pb_sg$counts
 )
 samples
@@ -1159,7 +1159,7 @@ somatic <- c("leydig cells", "peritubular myoid cells")
 pb_soma <- pb[, pb$factor.celltype %in% somatic]
 samples_soma <- data.frame(
     celltype = factor(pb_soma$factor.celltype, levels = somatic),
-    donor = pb_soma$factor.Donor
+    donor = factor(pb_soma$factor.Donor)
 )
 dds_soma <- DESeqDataSetFromMatrix(
     countData = assay(pb_soma, "sums"),
