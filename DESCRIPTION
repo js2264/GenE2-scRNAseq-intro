@@ -1,33 +1,53 @@
 Package: GenE2scRNAseqIntro
-Title: What the Package Does (One Line, Title Case)
-Description: 
-    This sentence is a placeholder. It should be changed by the author of 
-    the package to describe the purpose of this BiocBook. 
-    It should be at least 3 sentences otherwise `BiocCheck` will complain.
-Version: 0.98.0
-Date: `r date()`
-Authors@R: 
+Title: Introduction to Single-Cell RNA-seq Analysis with Bioconductor
+Description:
+    A live-coding workshop introducing single-cell RNA-seq analysis with
+    Bioconductor, written for the Master 2 GenE2 "Single-Cell Omics and
+    Spatial Transcriptomics" teaching unit. A short introduction explains how
+    10x Genomics droplet-based experiments turn a tissue into a matrix of UMI
+    counts. The 2h30 hands-on session then starts from the count matrix of the
+    adult human testis (Guo et al. 2018, GEO accession GSE112013) and walks
+    through the standard Bioconductor workflow: building a
+    SingleCellExperiment, quality control, normalisation, feature selection,
+    dimensionality reduction, batch correction, clustering, marker genes,
+    reference-based annotation with SingleR and pseudobulk differential
+    expression with DESeq2.
+Version: 0.99.0
+Date: 2026-10-20
+Authors@R:
     person(
-        "First", "Last", , "first.last@example.com", 
-        role = c("aut", "cre"),
-        comment = c(ORCID = "YOUR-ORCID-ID")
+        "Jacques", "Serizay", , "jacquesserizay@gmail.com",
+        role = c("aut", "cre")
     )
-URL: https://github.com/js2264/GenE2-scRNAseq-intro
-BugReports: https://github.com/js2264/GenE2-scRNAseq-intro
+URL: https://js2264.github.io/GenE2-scRNAseq-intro/devel/,
+    https://github.com/js2264/GenE2-scRNAseq-intro
+BugReports: https://github.com/js2264/GenE2-scRNAseq-intro/issues
 Depends:
-    R (>= 4.3)
-Imports:
+    R (>= 4.6.0)
 Suggests:
-    BiocBook, 
-    BiocManager, 
-    BiocVersion, 
-    BiocStyle, 
+    BiocBook,
+    BiocManager,
+    BiocVersion,
+    BiocStyle,
     reticulate,
     glue,
     sessioninfo,
-    knitr 
+    knitr,
+    BiocFileCache,
+    Matrix,
+    SummarizedExperiment,
+    SingleCellExperiment,
+    scrapper,
+    scater,
+    ggplot2,
+    patchwork,
+    SingleR,
+    celldex,
+    DESeq2
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
+LazyData: true
+LazyDataCompression: gzip
 BiocType: Book
 License: MIT + file LICENSE
 VignetteBuilder: knitr
