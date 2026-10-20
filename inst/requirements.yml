@@ -1,0 +1,26 @@
+## The conda environment this book's python chunks run in, created at build
+## time by BiocBook::setup_python().
+##
+## Pin what you depend on: the book is rebuilt regularly, and an unpinned
+## dependency means the rendered book can change under you without a single
+## commit. Any edit to this file gives the book a new environment on the next
+## render.
+##
+## `nodefaults` keeps the Anaconda `defaults` channel out. It is covered by the
+## Anaconda Terms of Service, which require a paid licence for many
+## organisations; conda-forge and bioconda are not. List conda-forge before
+## bioconda, as bioconda requires.
+name:
+    GenE2scRNAseqIntro
+channels:
+    - conda-forge
+    - bioconda
+    - nodefaults
+dependencies:
+    - python=3.12
+    ## add the python packages your book imports, pinned, e.g.:
+    # - numpy=1.26
+    # - matplotlib=3.8
+    ## On the Bioconductor images, matplotlib >= 3.11 fails to import: it needs
+    ## a more recent harfbuzz than the one R has already loaded. If a package
+    ## you import uses it, pin it below 3.11, e.g. `- matplotlib-base=3.10`

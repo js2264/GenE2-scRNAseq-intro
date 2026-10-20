@@ -1,0 +1,17 @@
+book:
+  title: "GenE2scRNAseqIntro"
+  chapters:
+    - index.qmd
+  cover-image: assets/cover.png
+  favicon: assets/favicon.png
+  sidebar: 
+    tools:
+      - icon: git
+        menu:
+          - text: Source Code
+            url:  https://github.com/js2264/GenE2-scRNAseq-intro/
+          - text: Browse version `devel`
+            url:  https://js2264.github.io/GenE2-scRNAseq-intro/devel/
+    style: "docked"
+    background: "light"
+    collapse-level: 5
