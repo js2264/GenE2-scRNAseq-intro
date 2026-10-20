@@ -1,0 +1,39 @@
+## R CMD check of the book package, in the Bioconductor devel container. The
+## book itself is rendered by the `biocbook` workflow, so vignettes are skipped
+## here. This replaces the template's `rworkflows` workflow:
+## `neurogenomics/rworkflows` depends on an action that no longer exists.
+
+name: rcmdcheck
+
+on:
+  push:
+    branches:
+      - devel
+      - RELEASE_**
+  pull_request:
+    branches:
+      - devel
+      - RELEASE_**
+
+jobs:
+  rcmdcheck:
+    runs-on: ubuntu-latest
+    name: R CMD check (Bioconductor devel)
+    container: ghcr.io/bioconductor/bioconductor:devel
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+
+      - name: 🧾 Checkout repository
+        uses: actions/checkout@v7
+
+      - name: 📦 Install the book's dependencies
+        run: |
+          Rscript -e 'install.packages(c("remotes", "rcmdcheck")) ; remotes::install_deps(dependencies = TRUE, repos = BiocManager::repositories(), upgrade = "never")'
+
+      - name: 🔍 Check the package
+        env:
+          _R_CHECK_CRAN_INCOMING_REMOTE_: false
+        run: |
+          Rscript -e 'rcmdcheck::rcmdcheck(args = c("--no-manual", "--ignore-vignettes"), build_args = "--no-build-vignettes", error_on = "warning", check_dir = "check")'
