@@ -10,7 +10,7 @@ Jacques Serizay
 
 **Package:** GenE2scRNAseqIntro\
 **Authors:** Jacques Serizay \[aut, cre\]\
-**Compiled:** 2026-10-20\
+**Compiled:** 2026-10-27\
 **Package version:** 0.99.0\
 **R version:** **R version 4.6.1 (2026-06-24)**\
 **BioC version:** **3.24**\
@@ -116,7 +116,7 @@ This workshop is adapted from the [BiocAfrica 2026 single-cell RNA-seq workshop]
 > ##   collate  C
 > ##   ctype    en_US.UTF-8
 > ##   tz       Etc/UTC
-> ##   date     2026-10-20
+> ##   date     2026-10-27
 > ##   pandoc   3.12.1 @ /usr/bin/ (via rmarkdown)
 > ##   quarto   1.11.5 @ /usr/local/bin/quarto
 > ##  
@@ -129,7 +129,7 @@ This workshop is adapted from the [BiocAfrica 2026 single-cell RNA-seq workshop]
 > ##   alabaster.schemas      1.13.0    2026-04-28 [2] Bioconductor 3.24 (R 4.6.1)
 > ##   alabaster.se           1.13.1    2026-09-06 [2] Bioconductor 3.24 (R 4.6.1)
 > ##   AnnotationDbi          1.75.2    2026-07-21 [2] Bioconductor 3.24 (R 4.6.1)
-> ##   AnnotationHub          4.3.2     2026-06-30 [2] Bioconductor 3.24 (R 4.6.1)
+> ##   AnnotationHub          4.3.3     2026-10-23 [2] Bioconductor 3.24 (R 4.6.1)
 > ##   askpass                1.2.1     2024-10-04 [2] RSPM (R 4.6.0)
 > ##   assorthead             1.7.11    2026-10-08 [2] Bioconductor 3.24 (R 4.6.1)
 > ##   base                 * 4.6.1     2026-10-15 [3] local
@@ -161,10 +161,10 @@ This workshop is adapted from the [BiocAfrica 2026 single-cell RNA-seq workshop]
 > ##   cachem                 1.1.0     2024-05-16 [2] RSPM (R 4.6.0)
 > ##   callr                  3.8.0     2026-06-05 [2] RSPM (R 4.6.0)
 > ##   celldex                1.23.0    2026-04-30 [2] Bioconductor 3.24 (R 4.6.1)
-> ##   class                  7.3-24    2026-08-03 [2] RSPM (R 4.6.0)
+> ##   class                  7.3-24    2026-08-03 [2] RSPM (R 4.6.1)
 > ##   cli                    3.6.6     2026-04-09 [2] RSPM (R 4.6.0)
 > ##   clipr                  0.8.1     2026-05-25 [2] RSPM (R 4.6.0)
-> ##   cluster                2.1.8.3   2026-07-30 [2] RSPM (R 4.6.0)
+> ##   cluster                2.1.8.3   2026-07-30 [2] RSPM (R 4.6.1)
 > ##   codetools              0.2-20    2024-03-31 [3] CRAN (R 4.6.1)
 > ##   commonmark             2.0.0     2025-07-07 [2] RSPM (R 4.6.0)
 > ##   compiler               4.6.1     2026-10-15 [3] local
@@ -196,12 +196,12 @@ This workshop is adapted from the [BiocAfrica 2026 single-cell RNA-seq workshop]
 > ##   filelock               1.0.3     2023-12-11 [2] RSPM (R 4.6.0)
 > ##   FNN                    1.1.4.1   2024-09-22 [2] RSPM (R 4.6.0)
 > ##   fontawesome            0.5.3     2024-11-16 [2] RSPM (R 4.6.0)
-> ##   foreign                0.8-91    2026-01-29 [3] CRAN (R 4.6.1)
+> ##   foreign                0.8-92    2026-10-17 [2] RSPM (R 4.6.1)
 > ##   formatR                1.14      2023-01-17 [2] RSPM (R 4.6.0)
 > ##   fs                     2.1.0     2026-04-18 [2] RSPM (R 4.6.0)
 > ##   futile.logger          1.4.9     2025-12-29 [2] RSPM (R 4.6.0)
 > ##   futile.options         1.0.1     2018-04-20 [2] RSPM (R 4.6.0)
-> ##   GenE2scRNAseqIntro     0.99.0    2026-10-20 [1] local
+> ##   GenE2scRNAseqIntro     0.99.0    2026-10-27 [1] local
 > ##   generics               0.1.4     2025-05-09 [2] RSPM (R 4.6.0)
 > ##   GenomicRanges          1.65.4    2026-09-02 [2] Bioconductor 3.24 (R 4.6.1)
 > ##   gert                   2.5.0     2026-10-14 [2] RSPM (R 4.6.0)
@@ -234,18 +234,18 @@ This workshop is adapted from the [BiocAfrica 2026 single-cell RNA-seq workshop]
 > ##   jsonlite               2.0.0     2025-03-27 [2] RSPM (R 4.6.0)
 > ##   jsonvalidate           1.5.0     2025-02-07 [2] RSPM (R 4.6.0)
 > ##   KEGGREST               1.53.6    2026-07-23 [2] Bioconductor 3.24 (R 4.6.1)
-> ##   KernSmooth             2.23-27   2026-08-12 [2] RSPM (R 4.6.0)
+> ##   KernSmooth             2.23-27   2026-08-12 [2] RSPM (R 4.6.1)
 > ##   knitr                  1.52      2026-09-06 [2] RSPM (R 4.6.0)
 > ##   labeling               0.4.3     2023-08-29 [2] RSPM (R 4.6.0)
 > ##   lambda.r               1.2.6     2026-10-13 [2] RSPM (R 4.6.0)
 > ##   later                  1.4.8     2026-03-05 [2] RSPM (R 4.6.0)
-> ##   lattice                0.23-1    2026-08-12 [2] RSPM (R 4.6.0)
+> ##   lattice                0.23-1    2026-08-12 [2] RSPM (R 4.6.1)
 > ##   lifecycle              1.0.5     2026-01-08 [2] RSPM (R 4.6.0)
 > ##   littler                0.3.23    2026-04-12 [2] RSPM (R 4.6.1)
 > ##   locfit                 1.5-9.12  2025-03-05 [2] RSPM (R 4.6.0)
 > ##   magrittr               2.0.5     2026-04-04 [2] RSPM (R 4.6.0)
-> ##   MASS                   7.3-66    2026-07-15 [2] RSPM (R 4.6.0)
-> ##   Matrix                 1.7-6     2026-07-25 [2] RSPM (R 4.6.0)
+> ##   MASS                   7.3-66    2026-07-15 [2] RSPM (R 4.6.1)
+> ##   Matrix                 1.7-6     2026-07-25 [2] RSPM (R 4.6.1)
 > ##   MatrixGenerics         1.25.0    2026-04-28 [2] Bioconductor 3.24 (R 4.6.1)
 > ##   matrixStats            1.5.0     2025-01-07 [2] RSPM (R 4.6.0)
 > ##   memoise                2.0.1     2021-11-26 [2] RSPM (R 4.6.0)
@@ -253,8 +253,8 @@ This workshop is adapted from the [BiocAfrica 2026 single-cell RNA-seq workshop]
 > ##   mgcv                   1.9-4     2025-11-07 [3] CRAN (R 4.6.1)
 > ##   mime                   0.13      2025-03-17 [2] RSPM (R 4.6.0)
 > ##   miniUI                 0.1.2     2025-04-17 [2] RSPM (R 4.6.0)
-> ##   nlme                   3.1-171   2026-09-01 [2] RSPM (R 4.6.0)
-> ##   nnet                   7.3-21    2026-08-03 [2] RSPM (R 4.6.0)
+> ##   nlme                   3.1-171   2026-09-01 [2] RSPM (R 4.6.1)
+> ##   nnet                   7.3-21    2026-08-03 [2] RSPM (R 4.6.1)
 > ##   openssl                2.4.2     2026-06-09 [2] RSPM (R 4.6.0)
 > ##   otel                   0.2.0     2025-08-29 [2] RSPM (R 4.6.0)
 > ##   pak                    0.11.1    2026-07-22 [2] RSPM (R 4.6.0)
@@ -313,7 +313,7 @@ This workshop is adapted from the [BiocAfrica 2026 single-cell RNA-seq workshop]
 > ##   sass                   0.4.10    2025-04-11 [2] RSPM (R 4.6.0)
 > ##   ScaledMatrix           1.21.0    2026-04-28 [2] Bioconductor 3.24 (R 4.6.1)
 > ##   scales                 1.4.0     2025-04-24 [2] RSPM (R 4.6.0)
-> ##   scater                 1.41.2    2026-06-30 [2] Bioconductor 3.24 (R 4.6.1)
+> ##   scater                 1.41.3    2026-10-25 [2] Bioconductor 3.24 (R 4.6.1)
 > ##   scrapper               1.7.9     2026-08-28 [2] Bioconductor 3.24 (R 4.6.1)
 > ##   scuttle                1.23.2    2026-08-27 [2] Bioconductor 3.24 (R 4.6.1)
 > ##   Seqinfo                1.3.2     2026-08-27 [2] Bioconductor 3.24 (R 4.6.1)
@@ -326,14 +326,14 @@ This workshop is adapted from the [BiocAfrica 2026 single-cell RNA-seq workshop]
 > ##   sourcetools            0.1.7-2   2026-03-28 [2] RSPM (R 4.6.0)
 > ##   SparseArray            1.13.4    2026-09-30 [2] Bioconductor 3.24 (R 4.6.1)
 > ##   sparseMatrixStats      1.25.0    2026-04-28 [2] Bioconductor 3.24 (R 4.6.1)
-> ##   spatial                7.3-19    2026-08-03 [2] RSPM (R 4.6.0)
+> ##   spatial                7.3-19    2026-08-03 [2] RSPM (R 4.6.1)
 > ##   splines                4.6.1     2026-10-15 [3] local
 > ##   stats                * 4.6.1     2026-10-15 [3] local
 > ##   stats4                 4.6.1     2026-10-15 [3] local
 > ##   stringi                1.8.9     2026-08-04 [2] RSPM (R 4.6.0)
 > ##   stringr                1.6.0     2025-11-04 [2] RSPM (R 4.6.0)
 > ##   SummarizedExperiment   1.43.0    2026-04-28 [2] Bioconductor 3.24 (R 4.6.1)
-> ##   survival               3.8-12    2026-09-09 [2] RSPM (R 4.6.0)
+> ##   survival               3.8-12    2026-09-09 [2] RSPM (R 4.6.1)
 > ##   sys                    3.4.3     2024-10-04 [2] RSPM (R 4.6.0)
 > ##   systemfonts            1.3.2     2026-03-05 [2] RSPM (R 4.6.0)
 > ##   tcltk                  4.6.1     2026-10-15 [3] local
@@ -349,7 +349,7 @@ This workshop is adapted from the [BiocAfrica 2026 single-cell RNA-seq workshop]
 > ##   utf8                   1.2.6     2025-06-08 [2] RSPM (R 4.6.0)
 > ##   utils                * 4.6.1     2026-10-15 [3] local
 > ##   uwot                   0.2.5     2026-08-29 [2] RSPM (R 4.6.0)
-> ##   V8                     8.2.0     2026-04-21 [2] RSPM (R 4.6.0)
+> ##   V8                     8.2.1     2026-10-26 [2] RSPM (R 4.6.0)
 > ##   vctrs                  0.7.3     2026-04-11 [2] RSPM (R 4.6.0)
 > ##   vipor                  0.4.7     2023-12-18 [2] RSPM (R 4.6.0)
 > ##   viridis                0.6.5     2024-01-29 [2] RSPM (R 4.6.0)
@@ -365,7 +365,7 @@ This workshop is adapted from the [BiocAfrica 2026 single-cell RNA-seq workshop]
 > ##   yaml                   2.3.12    2025-12-10 [2] RSPM (R 4.6.0)
 > ##   zip                    3.0.2     2026-08-04 [2] RSPM (R 4.6.0)
 > ##  
-> ##   [1] /tmp/Rtmp91yz7A/Rinstb238996e1
+> ##   [1] /tmp/RtmpumKCBl/Rinstb2e478030
 > ##   [2] /usr/local/lib/R/site-library
 > ##   [3] /usr/local/lib/R/library
 > ##   * ── Packages attached to the search path.

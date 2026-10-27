@@ -60,7 +60,7 @@ umi_url <- "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE112nnn/GSE112013/suppl/GS
 umi_path <- bfcrpath(bfc, umi_url)
 umi_path
 ##                                                                           BFC1 
-##  "/opt/R-cache/R/BiocFileCache/fa2f01cbe7_GSE112013_Combined_UMI_table.txt.gz"
+##  "/opt/R-cache/R/BiocFileCache/fb663f9dea_GSE112013_Combined_UMI_table.txt.gz"
 ```
 
 ### 2.2.2 Reading it into R
@@ -245,41 +245,6 @@ table(sce$Donor, sce$Replicate)
 
 Three donors, two 10x runs each: **six libraries**, for **three biological replicates**. Keep that in mind: it makes all the difference in [sec-pseudobulk](#sec-pseudobulk).
 
-### 2.3.2 Subsetting keeps everything in sync
-
-`[` subsets a `SingleCellExperiment` like a matrix, `[genes, cells]`, and subsets every slot accordingly:
-
-``` r
-sce_donor1 <- sce[, sce$Donor == "Donor1"]
-dim(sce_donor1)
-##  [1] 27477  2248
-table(sce_donor1$Donor)
-##  
-##  Donor1 
-##    2248
-counts(sce[c("PRM1", "SOX9"), 1:4])
-##  2 x 4 sparse Matrix of class "dgCMatrix"
-##       Donor2.AAACCTGGTGCCTTGG.1 Donor2.AAACCTGTCAACGGGA.1
-##  PRM1                       202                      3196
-##  SOX9                         .                         .
-##       Donor2.AAACCTGTCCTATGTT.1 Donor2.AAACCTGTCGGACAAG.1
-##  PRM1                      3072                      1775
-##  SOX9                         .                         1
-```
-
-> **NOTE:**
->
-> How many cells does each **sample** contribute? Which sample is the largest?
-
-> **NOTE:**
->
-> ``` r
-> table(sce$Sample)
-> ##  
-> ##  Donor1_rep1 Donor1_rep2 Donor2_rep1 Donor2_rep2 Donor3_rep1 Donor3_rep2 
-> ##         1000        1248         985        1009        1116        1132
-> ```
-
 ## 2.4 Quality control
 
 Not every column of the matrix is a healthy cell ([sec-count-matrix](#sec-count-matrix)). Some barcodes are droplets that only caught ambient RNA, some are cells that were damaged or dying, some are two cells captured together. We remove the worst of them **first**, as they would distort every later step.
@@ -432,13 +397,7 @@ p_sum / p_mito
 >
 > Thresholds computed within each library are **relative**: they assume that most cells of each library are fine, and adapt to each of them. A cell with 15% of mitochondrial counts is thus discarded from `Donor2` and `Donor3`, but kept in `Donor1`. A fixed threshold, say `sce$subset.proportion.Mito < 0.1`, would treat all libraries the same. Neither choice is right in general: make it knowingly, and look at the plots.
 
-Let’s filter:
-
-``` r
-sce <- sce[, sce$keep]
-dim(sce)
-##  [1] 27477  5583
-```
+We’ll skip filtering for now and retain all cells.
 
 We keep 5,583 cells.
 
@@ -1223,7 +1182,7 @@ About twenty lines of code. Everything else was looking at the results and decid
 > ##  
 > ##  other attached packages:
 > ##   [1] DESeq2_1.53.6               SingleR_2.15.4             
-> ##   [3] patchwork_1.3.2             scater_1.41.2              
+> ##   [3] patchwork_1.3.2             scater_1.41.3              
 > ##   [5] ggplot2_4.0.3               scuttle_1.23.2             
 > ##   [7] scrapper_1.7.9              SingleCellExperiment_1.35.2
 > ##   [9] SummarizedExperiment_1.43.0 Biobase_2.73.2             
