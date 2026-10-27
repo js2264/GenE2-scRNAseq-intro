@@ -213,6 +213,7 @@ Three donors, two 10x runs each: **six libraries**, for **three biological
 replicates**. Keep that in mind: it makes all the difference in
 @sec-pseudobulk.
 
+<!-- 
 ### Subsetting keeps everything in sync
 
 `[` subsets a `SingleCellExperiment` like a matrix, `[genes, cells]`, and
@@ -248,6 +249,7 @@ table(sce$Sample)
 
 :::
 ::::
+-->
 
 ## Quality control {#sec-qc}
 
@@ -368,6 +370,9 @@ it knowingly, and look at the plots.
 :::
 ::::
 
+We'll skip filtering for now and retain all cells.
+
+<!-- 
 Let's filter:
 
 ```{r}
@@ -375,6 +380,7 @@ Let's filter:
 sce <- sce[, sce$keep]
 dim(sce)
 ```
+-->
 
 We keep `r format(ncol(sce), big.mark = ",")` cells.
 
